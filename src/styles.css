@@ -1,1 +1,142 @@
-/* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@400;500;700&display=swap');
+
+/* Identidad visual: sala a oscuras, telón rojo y detalles dorados de marquesina */
+:root {
+	--bg-0: #0b0d17;
+	--bg-1: #141829;
+	--surface: rgba(26, 31, 51, 0.88);
+	--surface-strong: #1f2540;
+	--text-main: #f3f0e8;
+	--text-soft: #a7abc0;
+	--accent: #d7263d;
+	--accent-strong: #a31b2e;
+	--gold: #f2c14e;
+	--warning: #ff6b6b;
+	--ring: rgba(242, 193, 78, 0.45);
+	--shadow-soft: 0 14px 40px rgba(0, 0, 0, 0.45);
+	--shadow-card: 0 10px 26px rgba(0, 0, 0, 0.35);
+}
+
+* {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	min-height: 100%;
+}
+
+body {
+	margin: 0;
+	font-family: 'Outfit', 'Trebuchet MS', sans-serif;
+	color: var(--text-main);
+	background:
+		radial-gradient(ellipse at 50% -10%, rgba(242, 193, 78, 0.16) 0, rgba(242, 193, 78, 0) 45%),
+		radial-gradient(circle at 100% 100%, rgba(215, 38, 61, 0.14) 0, rgba(215, 38, 61, 0) 40%),
+		linear-gradient(180deg, var(--bg-1) 0%, var(--bg-0) 100%);
+	background-attachment: fixed;
+	line-height: 1.5;
+}
+
+h1,
+h2,
+h3 {
+	font-family: 'Bebas Neue', Impact, sans-serif;
+	font-weight: 400;
+	letter-spacing: 0.06em;
+	margin-top: 0;
+}
+
+h1 {
+	font-size: 3rem;
+	color: var(--gold);
+}
+
+a {
+	color: var(--gold);
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+button {
+	border: 0;
+	border-radius: 12px;
+	background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
+	color: #fff;
+	font: inherit;
+	font-weight: 700;
+	letter-spacing: 0.02em;
+	padding: 0.72rem 1rem;
+	cursor: pointer;
+	box-shadow: 0 8px 16px rgba(163, 27, 46, 0.35);
+	transition: transform 160ms ease, box-shadow 160ms ease, filter 160ms ease;
+}
+
+button:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 10px 20px rgba(163, 27, 46, 0.45);
+	filter: brightness(1.08);
+}
+
+button:active {
+	transform: translateY(0);
+}
+
+button:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+	transform: none;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+a:focus-visible {
+	outline: 3px solid var(--ring);
+	outline-offset: 2px;
+}
+
+input,
+select {
+	width: 100%;
+	border: 1px solid rgba(167, 171, 192, 0.25);
+	border-radius: 12px;
+	padding: 0.72rem 0.84rem;
+	font: inherit;
+	color: var(--text-main);
+	background: var(--surface-strong);
+}
+
+input::placeholder {
+	color: var(--text-soft);
+}
+
+p {
+	margin: 0.3rem 0 0.6rem;
+}
+
+small {
+	color: var(--warning);
+	font-weight: 500;
+}
+
+.card {
+	border-radius: 18px;
+	border: 1px solid rgba(242, 193, 78, 0.14);
+	background: var(--surface);
+	box-shadow: var(--shadow-soft);
+}
+
+@keyframes riseIn {
+	from {
+		opacity: 0;
+		transform: translateY(12px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}

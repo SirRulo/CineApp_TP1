@@ -47,7 +47,7 @@ Repo del profe clonado **al lado de este proyecto**: `../A342-2` (origen: `https
 | Guards (`canActivate`, `canMatch`, `canActivateChild`, `canDeactivate`) | `../A342-2/guards` |
 | Módulos (`NgModule`, `loadChildren`, `forChild`) | `../A342-2/modulos` |
 | Directivas de atributo y estructurales, `ngClass`, `ng-content`, `ng-template` | `../A342-2/directivas` |
-| Pipes propios y predefinidos, PWA, `firebase.json` | `../A342-2/pipes` |
+| Pipes propios y predefinidos, PWA, `firebase.json` (referencia; usamos Vercel) | `../A342-2/pipes` |
 
 Antes de implementar algo, **buscá primero el ejemplo equivalente** en esas carpetas y seguí el mismo estilo.
 
@@ -57,21 +57,16 @@ Antes de implementar algo, **buscá primero el ejemplo equivalente** en esas car
 
 - **Angular 22** (standalone, signals, control flow `@if`/`@for`), TypeScript, CSS plano.
 - **Supabase** (`@supabase/supabase-js`): autenticación y base de datos. Es el único back.
-- **Firebase Hosting**: solo para publicar la app. No usar la base de datos de Firebase.
-- **PWA**: `ng add @angular/pwa` (service worker + manifest).
+- **Vercel** (reemplaza a Firebase Hosting del material): solo para publicar la app. Está conectado al repo `github.com/SirRulo/CineApp_TP1`: **cada push publica**.
+- **PWA**: `ng add @angular/pwa` (service worker + manifest). Ya instalada.
 
 ```bash
 ng serve -o                          # desarrollo
-ng build                             # build de producción → dist/<proyecto>/browser
-firebase deploy --only hosting       # publicar (siempre después de ng build)
+ng build                             # build de producción → dist/CineApp/browser
+git push                             # publicar (Vercel compila y despliega solo)
 ```
 
-`firebase.json` apunta directo al build (como mostró el profe en clase):
-```json
-{ "hosting": { "public": "dist/<proyecto>/browser",
-               "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
-               "rewrites": [ { "source": "**", "destination": "/index.html" } ] } }
-```
+No hace falta `vercel.json`: Vercel ya devuelve `index.html` para cualquier ruta (probado con `/asdf`). Es lo mismo que el `rewrites` del `firebase.json` del profe (`pipes`). Si el profe pregunta: la idea es igual que Firebase Hosting, servir el build estático por HTTPS con fallback a `index.html` porque es una SPA.
 
 ---
 
@@ -182,7 +177,7 @@ Actualizá esta sección (con mi OK) cada vez que terminemos un paso.
 
 | Pre-entrega | Objetivo | Estado |
 |---|---|---|
-| Lun 21/09 | Repo + proyecto Angular + primer deploy | ⏳ |
+| Lun 21/09 | Repo + proyecto Angular + primer deploy | ✅ (GitHub + Vercel) |
 | Mié 23/09 | **S0** completo (PWA, rutas, estilos base, tablas) + **S1A** (registro, login, roles) + **S1B** (alta de películas y funciones desde el admin) | ⏳ |
 | Lun 28/09 | **S1C** (cartelera, butacas, compra, cupón, QR) + **S2** (reseñas, promedio, top 3, buscador por género) | ⏳ |
 | Mié 30/09 | **S3** (cupones, candy bar) + **S4** (empleados, validación QR, asignación automática de salas) | ⏳ |
@@ -190,4 +185,6 @@ Actualizá esta sección (con mi OK) cada vez que terminemos un paso.
 
 Orden de trabajo recomendado por el profe: **primero lo que carga el admin, después lo que consume el cliente.**
 
-**Próximo paso:** S0 — crear el proyecto Angular 22, estructura de carpetas, `environment.ts`, rutas base con `'**'` al final, layout con navbar/footer, variables CSS, `ng add @angular/pwa` y primer deploy en Firebase Hosting.
+**Hecho de S0:** proyecto Angular 22, rutas base (`home`, `'**'` → `Error` al final), deploy en Vercel, `@supabase/supabase-js` + `environment.ts`, PWA.
+
+**Próximo paso:** S0 — estilos globales (variables CSS), layout con navbar/footer y tablas en Supabase.
