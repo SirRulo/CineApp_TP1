@@ -1,0 +1,90 @@
+<section class="registro card">
+  <h2>Crear cuenta</h2>
+
+  <form (submit)="onSubmit($event)">
+    <label>
+      Mail
+      <input type="email" [formField]="registroForm.email" />
+      @if (registroForm.email().touched() && registroForm.email().invalid()) {
+        <small>{{ registroForm.email().errors()[0].message }}</small>
+      }
+    </label>
+
+    <label>
+      Contraseña
+      <input type="password" [formField]="registroForm.password" />
+      @if (registroForm.password().touched() && registroForm.password().invalid()) {
+        <small>{{ registroForm.password().errors()[0].message }}</small>
+      }
+    </label>
+
+    <div class="fila">
+      <label>
+        Nombre
+        <input type="text" [formField]="registroForm.nombre" />
+        @if (registroForm.nombre().touched() && registroForm.nombre().invalid()) {
+          <small>{{ registroForm.nombre().errors()[0].message }}</small>
+        }
+      </label>
+      <label>
+        Apellido
+        <input type="text" [formField]="registroForm.apellido" />
+        @if (registroForm.apellido().touched() && registroForm.apellido().invalid()) {
+          <small>{{ registroForm.apellido().errors()[0].message }}</small>
+        }
+      </label>
+    </div>
+
+    <!-- Fecha en 3 campos: la consigna pide nada de calendarios desplegables -->
+    <fieldset>
+      <legend>Fecha de nacimiento</legend>
+      <div class="fila fecha">
+        <input type="number" placeholder="Día" [formField]="registroForm.dia" />
+        <input type="number" placeholder="Mes" [formField]="registroForm.mes" />
+        <input type="number" placeholder="Año" [formField]="registroForm.anio" />
+      </div>
+      @if (registroForm.dia().touched() && registroForm.dia().invalid()) {
+        <small>{{ registroForm.dia().errors()[0].message }}</small>
+      } @else if (registroForm.mes().touched() && registroForm.mes().invalid()) {
+        <small>{{ registroForm.mes().errors()[0].message }}</small>
+      } @else if (registroForm.anio().touched() && registroForm.anio().invalid()) {
+        <small>{{ registroForm.anio().errors()[0].message }}</small>
+      }
+    </fieldset>
+
+    <div class="fila">
+      <label>
+        Tipo de sangre
+        <select [formField]="registroForm.tipo_sangre">
+          <option value="" disabled>Elegí…</option>
+          @for (tipo of tiposSangre; track tipo) {
+            <option [value]="tipo">{{ tipo }}</option>
+          }
+        </select>
+      </label>
+      <label>
+        Color de ojos
+        <select [formField]="registroForm.color_ojos">
+          <option value="" disabled>Elegí…</option>
+          @for (color of coloresOjos; track color) {
+            <option [value]="color">{{ color }}</option>
+          }
+        </select>
+      </label>
+    </div>
+
+    <label>
+      Días de vacaciones por año
+      <input type="number" [formField]="registroForm.dias_vacaciones" />
+      @if (registroForm.dias_vacaciones().touched() && registroForm.dias_vacaciones().invalid()) {
+        <small>{{ registroForm.dias_vacaciones().errors()[0].message }}</small>
+      }
+    </label>
+
+    <button type="submit" [disabled]="registroForm().invalid()">Registrarme</button>
+
+    @if (mensaje()) {
+      <small>{{ mensaje() }}</small>
+    }
+  </form>
+</section>

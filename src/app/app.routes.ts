@@ -10,6 +10,10 @@ export const routes: Routes = [
         path: 'home',
         loadComponent: () => import('./componentes/home/home').then(m => m.Home)
     },
+    {
+        path: 'registro',
+        loadComponent: () => import('./componentes/registro/registro').then(m => m.Registro)
+    },
     // Siempre al final: el router prueba las rutas en orden y '**' atrapa cualquier cosa.
     {
         path: '**',
