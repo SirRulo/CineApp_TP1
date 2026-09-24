@@ -1,0 +1,29 @@
+<section class="login card">
+  <h2>Ingresar</h2>
+
+  <form (submit)="onSubmit($event)">
+    <label>
+      Mail
+      <input type="email" [formField]="loginForm.email" />
+      @if (loginForm.email().touched() && loginForm.email().invalid()) {
+        <small>{{ loginForm.email().errors()[0].message }}</small>
+      }
+    </label>
+
+    <label>
+      Contraseña
+      <input type="password" [formField]="loginForm.password" />
+      @if (loginForm.password().touched() && loginForm.password().invalid()) {
+        <small>{{ loginForm.password().errors()[0].message }}</small>
+      }
+    </label>
+
+    <button type="submit" [disabled]="loginForm().invalid()">Ingresar</button>
+
+    @if (mensaje()) {
+      <small>{{ mensaje() }}</small>
+    }
+  </form>
+
+  <p class="pie">¿No tenés cuenta? <a routerLink="/registro">Registrate</a></p>
+</section>
