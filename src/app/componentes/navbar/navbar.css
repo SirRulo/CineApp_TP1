@@ -1,0 +1,43 @@
+.navbar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 0.8rem 1.5rem;
+	background: var(--surface);
+	border-bottom: 1px solid rgba(242, 193, 78, 0.14);
+	box-shadow: var(--shadow-card);
+}
+
+.marca {
+	font-family: 'Bebas Neue', Impact, sans-serif;
+	font-size: 2rem;
+	letter-spacing: 0.08em;
+	color: var(--gold);
+}
+
+.marca:hover {
+	text-decoration: none;
+}
+
+.links {
+	display: flex;
+	gap: 1.2rem;
+}
+
+.links a {
+	color: var(--text-soft);
+	font-weight: 500;
+	padding-bottom: 0.2rem;
+	border-bottom: 2px solid transparent;
+}
+
+.links a:hover {
+	color: var(--text-main);
+	text-decoration: none;
+}
+
+.links a.active {
+	color: var(--text-main);
+	border-bottom-color: var(--accent);
+}

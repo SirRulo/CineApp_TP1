@@ -1,0 +1,11 @@
+/* :host es el propio <app-root>: columna que ocupa toda la pantalla */
+:host {
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+}
+
+/* main crece y empuja al footer hacia abajo aunque haya poco contenido */
+main {
+	flex: 1;
+}
