@@ -1,0 +1,45 @@
+<section class="lista card">
+  <header class="encabezado">
+    <h2>Funciones</h2>
+    <a routerLink="/admin/funciones/nueva">+ Nueva función</a>
+  </header>
+
+  @if (mensaje()) {
+    <small>{{ mensaje() }}</small>
+  }
+
+  @if (funciones().length > 0) {
+    <ul>
+      @for (funcion of funciones(); track funcion.id) {
+        <li [class.inactiva]="!funcion.activa">
+          <!-- El pipe date muestra el timestamptz (UTC) en hora local -->
+          <div class="horario">
+            <strong>{{ funcion.inicio | date: 'dd/MM' }}</strong>
+            <span>{{ funcion.inicio | date: 'HH:mm' }} – {{ funcion.fin | date: 'HH:mm' }}</span>
+          </div>
+          <div class="datos">
+            <strong>{{ tituloDe(funcion.pelicula_id) }}</strong>
+            <span>{{ salaDe(funcion.sala_id) }} · {{ funcion.formato }} · {{ funcion.idioma === 'castellano' ? 'Castellano' : 'Subtitulada' }}</span>
+            <span>$ {{ funcion.precio }} · VIP $ {{ funcion.precio_vip }}</span>
+            <span class="etiquetas">
+              <span>{{ funcion.activa ? 'Activa' : 'Inactiva' }}</span>
+              @if (!funcion.activa && !puedeActivarse(funcion)) {
+                <span class="ocupado">Horario ocupado</span>
+              }
+            </span>
+          </div>
+          <div class="acciones">
+            <!-- Una inactiva cuyo horario ya está tomado no se puede activar: botón deshabilitado -->
+            <button type="button"
+                    [disabled]="!funcion.activa && !puedeActivarse(funcion)"
+                    (click)="alternarActiva(funcion)">
+              {{ funcion.activa ? 'Desactivar' : 'Activar' }}
+            </button>
+          </div>
+        </li>
+      }
+    </ul>
+  } @else if (!mensaje()) {
+    <p class="vacio">Todavía no hay funciones cargadas.</p>
+  }
+</section>
