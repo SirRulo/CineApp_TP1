@@ -1,0 +1,107 @@
+<section class="alta card">
+  <h2>Nueva función</h2>
+
+  <form [formGroup]="formFuncion" (ngSubmit)="guardar()">
+    <div class="fila">
+      <label>
+        Película
+        <!-- [ngValue] guarda el objeto Pelicula entero (con su duración) -->
+        <select formControlName="pelicula">
+          <option [ngValue]="null" disabled>Elegí una película</option>
+          @for (pelicula of peliculas(); track pelicula.id) {
+            <option [ngValue]="pelicula">{{ pelicula.titulo }} ({{ pelicula.duracion_min }} min)</option>
+          }
+        </select>
+      </label>
+      <label>
+        Sala
+        <select formControlName="sala_id">
+          <option [ngValue]="null" disabled>Elegí una sala</option>
+          @for (sala of salas(); track sala.id) {
+            <option [ngValue]="sala.id">{{ sala.nombre }}</option>
+          }
+        </select>
+      </label>
+    </div>
+
+    <!-- Día con botones: type="button" para que no envíe el formulario -->
+    <fieldset>
+      <legend>Día</legend>
+      <div class="dias">
+        @for (dia of dias; track dia.getTime()) {
+          <button type="button" class="dia"
+                  [class.elegido]="formFuncion.controls.dia.value === dia"
+                  (click)="elegirDia(dia)">
+            <span>{{ nombresDias[dia.getDay()] }}</span>
+            {{ dia | date: 'dd/MM' }}
+          </button>
+        }
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Hora de inicio</legend>
+      <div class="fila hora">
+        <input type="number" placeholder="Hora" formControlName="hora" />
+        <input type="number" placeholder="Min" formControlName="minutos" />
+      </div>
+      @if (formFuncion.controls.hora.touched && formFuncion.controls.hora.invalid) {
+        <small>Hora entre 0 y 23</small>
+      } @else if (formFuncion.controls.minutos.touched && formFuncion.controls.minutos.invalid) {
+        <small>Minutos entre 0 y 59</small>
+      }
+    </fieldset>
+
+    <div class="fila">
+      <label>
+        Formato
+        <select formControlName="formato">
+          @for (formato of formatos; track formato) {
+            <option [ngValue]="formato">{{ formato }}</option>
+          }
+        </select>
+      </label>
+      <label>
+        Idioma
+        <select formControlName="idioma">
+          @for (idioma of idiomas; track idioma) {
+            <option [ngValue]="idioma">{{ idioma === 'castellano' ? 'Castellano' : 'Subtitulada' }}</option>
+          }
+        </select>
+      </label>
+    </div>
+
+    <div class="fila">
+      <label>
+        Precio
+        <input type="number" formControlName="precio" />
+        @if (formFuncion.controls.precio.touched && formFuncion.controls.precio.invalid) {
+          <small>Tiene que ser mayor a 0</small>
+        }
+      </label>
+      <label>
+        Precio VIP (filas R–T)
+        <input type="number" formControlName="precio_vip" />
+        @if (formFuncion.controls.precio_vip.touched && formFuncion.controls.precio_vip.invalid) {
+          <small>Tiene que ser mayor a 0</small>
+        }
+      </label>
+    </div>
+
+    <!-- Error del validador del grupo: se pregunta al FormGroup, no a un control -->
+    @if (formFuncion.hasError('salaOcupada')) {
+      <small>
+        La sala está ocupada: ya hay una función de
+        {{ formFuncion.getError('salaOcupada').inicio | date: 'HH:mm' }} a
+        {{ formFuncion.getError('salaOcupada').fin | date: 'HH:mm' }}
+        y entre funciones tiene que haber 30 minutos de limpieza.
+      </small>
+    }
+
+    <button type="submit" [disabled]="!formFuncion.valid">Guardar función</button>
+
+    @if (mensaje()) {
+      <small [class.ok]="exito()">{{ mensaje() }}</small>
+    }
+  </form>
+</section>
