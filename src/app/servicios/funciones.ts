@@ -26,6 +26,15 @@ export class Funciones {
         return this.supabase.from('funciones').select('*').eq('sala_id', salaId).eq('activa', true);
     }
 
+    // Para el detalle de la película (cliente): solo las activas que todavía no empezaron.
+    // gte = "mayor o igual que" (greater than or equal)
+    getFuncionesDePelicula(peliculaId: number) {
+        return this.supabase.from('funciones').select('*')
+            .eq('pelicula_id', peliculaId).eq('activa', true)
+            .gte('inicio', new Date().toISOString())
+            .order('inicio');
+    }
+
     addFuncion(funcion: Funcion) {
         return this.supabase.from('funciones').insert([funcion]);
     }

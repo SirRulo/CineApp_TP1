@@ -1,0 +1,135 @@
+.detalle {
+  width: min(100% - 2rem, 1000px);
+  margin: 2rem auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  animation: riseIn 0.4s ease-out;
+}
+
+.volver {
+  color: var(--text-soft);
+  align-self: flex-start;
+}
+
+/* Póster a la izquierda, datos a la derecha */
+.ficha {
+  display: flex;
+  gap: 1.5rem;
+  padding: 1.5rem;
+}
+
+.ficha img {
+  width: 220px;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: 12px;
+  background: var(--bg-0);
+  flex-shrink: 0;
+}
+
+.texto h1 {
+  margin: 0 0 0.6rem;
+  line-height: 1;
+}
+
+.texto p {
+  color: var(--text-soft);
+}
+
+.etiquetas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.etiquetas span {
+  padding: 0.1rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid rgba(167, 171, 192, 0.25);
+  font-size: 0.85rem;
+  color: var(--text-soft);
+}
+
+.funciones {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.funciones h2 {
+  margin: 0;
+}
+
+.botones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* Botones de día y horario: discretos, solo se pinta el elegido (igual que en AltaFuncion) */
+button.opcion {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--surface-strong);
+  color: var(--text-main);
+  border: 1px solid rgba(167, 171, 192, 0.25);
+  box-shadow: none;
+  font-weight: 500;
+}
+
+button.opcion span {
+  color: var(--text-soft);
+  font-size: 0.8rem;
+}
+
+button.dia {
+  min-width: 72px;
+  padding: 0.5rem 0.6rem;
+}
+
+button.horario {
+  min-width: 110px;
+  padding: 0.55rem 0.8rem;
+}
+
+button.horario strong {
+  font-size: 1.15rem;
+}
+
+button.opcion.elegido {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
+  border-color: var(--gold);
+}
+
+button.opcion.elegido span {
+  color: var(--gold);
+}
+
+.resumen {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(167, 171, 192, 0.15);
+}
+
+.vacio {
+  color: var(--text-soft);
+  margin: 0;
+}
+
+@media (max-width: 600px) {
+  .ficha {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .resumen {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

@@ -1,0 +1,68 @@
+<section class="detalle">
+  <a routerLink="/home" class="volver">← Cartelera</a>
+
+  @if (pelicula(); as p) {
+    <div class="ficha card">
+      <img [src]="p.imagen_url" [alt]="p.titulo" />
+      <div class="texto">
+        <h1>{{ p.titulo }}</h1>
+        <div class="etiquetas">
+          <span>{{ p.edad_minima === 0 ? 'ATP' : '+' + p.edad_minima }}</span>
+          <span>{{ p.duracion_min }} min</span>
+          @for (genero of generos(); track genero) {
+            <span>{{ genero }}</span>
+          }
+        </div>
+        <p>{{ p.sinopsis }}</p>
+      </div>
+    </div>
+
+    <div class="funciones card">
+      <h2>Funciones</h2>
+
+      @if (dias().length > 0) {
+        <!-- 1) Días con funciones -->
+        <div class="botones">
+          @for (dia of dias(); track dia.getTime()) {
+            <button type="button" class="opcion dia"
+                    [class.elegido]="diaElegido() === dia"
+                    (click)="elegirDia(dia)">
+              <span>{{ nombresDias[dia.getDay()] }}</span>
+              {{ dia | date: 'dd/MM' }}
+            </button>
+          }
+        </div>
+
+        <!-- 2) Horarios del día elegido -->
+        <div class="botones">
+          @for (funcion of funcionesDelDia(); track funcion.id) {
+            <button type="button" class="opcion horario"
+                    [class.elegido]="funcionElegida() === funcion"
+                    (click)="elegirFuncion(funcion)">
+              <strong>{{ funcion.inicio | date: 'HH:mm' }}</strong>
+              <span>{{ funcion.formato }} · {{ funcion.idioma === 'castellano' ? 'Cast.' : 'Subt.' }}</span>
+              <span>{{ salaDe(funcion.sala_id) }}</span>
+            </button>
+          }
+        </div>
+
+        <!-- 3) Seguir a las butacas: se conecta en el paso 3 -->
+        @if (funcionElegida(); as f) {
+          <div class="resumen">
+            <span>
+              {{ f.inicio | date: 'dd/MM HH:mm' }} · {{ salaDe(f.sala_id) }} · {{ f.formato }} ·
+              desde $ {{ f.precio }}
+            </span>
+            <button type="button" disabled>Elegir butacas</button>
+          </div>
+        }
+      } @else if (!mensaje()) {
+        <p class="vacio">No hay funciones programadas para esta película.</p>
+      }
+    </div>
+  }
+
+  @if (mensaje()) {
+    <small>{{ mensaje() }}</small>
+  }
+</section>

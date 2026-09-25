@@ -11,6 +11,11 @@ export const routes: Routes = [
         path: 'home',
         loadComponent: () => import('./componentes/home/home').then(m => m.Home)
     },
+    // :id = parámetro: /pelicula/3 carga la película 3 (se lee con paramMap)
+    {
+        path: 'pelicula/:id',
+        loadComponent: () => import('./componentes/detalle-pelicula/detalle-pelicula').then(m => m.DetallePelicula)
+    },
     {
         path: 'registro',
         loadComponent: () => import('./componentes/registro/registro').then(m => m.Registro)
