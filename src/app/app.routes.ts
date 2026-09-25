@@ -39,6 +39,11 @@ export const routes: Routes = [
             {
                 path: 'peliculas/nueva',
                 loadComponent: () => import('./componentes/alta-pelicula/alta-pelicula').then(m => m.AltaPelicula)
+            },
+            // Mismo componente: si viene :id, trabaja en modo edición
+            {
+                path: 'peliculas/editar/:id',
+                loadComponent: () => import('./componentes/alta-pelicula/alta-pelicula').then(m => m.AltaPelicula)
             }
         ]
     },

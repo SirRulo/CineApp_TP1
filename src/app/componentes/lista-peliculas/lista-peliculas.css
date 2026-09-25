@@ -71,6 +71,12 @@ img {
   border-color: var(--gold);
 }
 
+.acciones {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
 .vacio {
   color: var(--text-soft);
   margin-top: 1rem;
@@ -81,7 +87,8 @@ img {
     flex-wrap: wrap;
   }
 
-  button {
+  .acciones {
     width: 100%;
+    justify-content: space-between;
   }
 }

@@ -1,5 +1,5 @@
 <section class="alta card">
-  <h2>Nueva película</h2>
+  <h2>{{ peliculaId() ? 'Editar película' : 'Nueva película' }}</h2>
 
   <form [formGroup]="formPelicula" (ngSubmit)="guardar()">
     <label>
@@ -92,7 +92,7 @@
     </label>
 
     <button type="submit" [disabled]="!formPelicula.valid || generosSeleccionados().length === 0">
-      Guardar película
+      {{ peliculaId() ? 'Guardar cambios' : 'Guardar película' }}
     </button>
 
     @if (mensaje()) {

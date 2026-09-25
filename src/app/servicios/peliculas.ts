@@ -16,6 +16,11 @@ export class Peliculas {
         return this.supabase.from('peliculas').select('*').order('titulo');
     }
 
+    // Como getPerfil: select con filtro → devuelve un arreglo, se lee data[0]
+    getPelicula(id: number) {
+        return this.supabase.from('peliculas').select('*').eq('id', id);
+    }
+
     getGeneros() {
         return this.supabase.from('generos').select('*');
     }
@@ -34,5 +39,16 @@ export class Peliculas {
     addGenerosDePelicula(peliculaId: number, generoIds: number[]) {
         const filas = generoIds.map(generoId => ({ pelicula_id: peliculaId, genero_id: generoId }));
         return this.supabase.from('pelicula_generos').insert(filas);
+    }
+
+    // Solo la columna genero_id: [{ genero_id: 3 }, { genero_id: 5 }]
+    getGenerosDePelicula(peliculaId: number) {
+        return this.supabase.from('pelicula_generos').select('genero_id').eq('pelicula_id', peliculaId);
+    }
+
+    // Borra las filas de la tabla de relación (no la película): se usa al editar,
+    // antes de volver a insertar los géneros tildados.
+    deleteGenerosDePelicula(peliculaId: number) {
+        return this.supabase.from('pelicula_generos').delete().eq('pelicula_id', peliculaId);
     }
 }

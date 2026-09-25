@@ -23,9 +23,12 @@
               }
             </span>
           </div>
-          <button type="button" (click)="alternarActiva(pelicula)">
-            {{ pelicula.activa ? 'Desactivar' : 'Activar' }}
-          </button>
+          <div class="acciones">
+            <a [routerLink]="['/admin/peliculas/editar', pelicula.id]">Editar</a>
+            <button type="button" (click)="alternarActiva(pelicula)">
+              {{ pelicula.activa ? 'Desactivar' : 'Activar' }}
+            </button>
+          </div>
         </li>
       }
     </ul>
