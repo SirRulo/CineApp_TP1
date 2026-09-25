@@ -1,0 +1,35 @@
+<section class="lista card">
+  <header class="encabezado">
+    <h2>Películas</h2>
+    <a routerLink="/admin/peliculas/nueva">+ Nueva película</a>
+  </header>
+
+  @if (mensaje()) {
+    <small>{{ mensaje() }}</small>
+  }
+
+  @if (peliculas().length > 0) {
+    <ul>
+      @for (pelicula of peliculas(); track pelicula.id) {
+        <li [class.inactiva]="!pelicula.activa">
+          <img [src]="pelicula.imagen_url" [alt]="pelicula.titulo" />
+          <div class="datos">
+            <strong>{{ pelicula.titulo }}</strong>
+            <span>Estreno {{ pelicula.fecha_estreno | date: 'dd/MM/yyyy' }} · {{ pelicula.duracion_min }} min</span>
+            <span class="etiquetas">
+              <span class="estado">{{ pelicula.activa ? 'Activa' : 'Inactiva' }}</span>
+              @if (pelicula.destacada) {
+                <span class="destacada">Destacada</span>
+              }
+            </span>
+          </div>
+          <button type="button" (click)="alternarActiva(pelicula)">
+            {{ pelicula.activa ? 'Desactivar' : 'Activar' }}
+          </button>
+        </li>
+      }
+    </ul>
+  } @else if (!mensaje()) {
+    <p class="vacio">Todavía no hay películas cargadas.</p>
+  }
+</section>

@@ -26,6 +26,16 @@ export const routes: Routes = [
         loadComponent: () => import('./componentes/admin/admin').then(m => m.Admin),
         canMatch: [roleGuard('admin')],
         children: [
+            // /admin a secas muestra el listado
+            {
+                path: '',
+                redirectTo: 'peliculas',
+                pathMatch: 'full'
+            },
+            {
+                path: 'peliculas',
+                loadComponent: () => import('./componentes/lista-peliculas/lista-peliculas').then(m => m.ListaPeliculas)
+            },
             {
                 path: 'peliculas/nueva',
                 loadComponent: () => import('./componentes/alta-pelicula/alta-pelicula').then(m => m.AltaPelicula)

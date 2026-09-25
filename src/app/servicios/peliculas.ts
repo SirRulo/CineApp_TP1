@@ -12,7 +12,8 @@ export class Peliculas {
     }
 
     getPeliculas() {
-        return this.supabase.from('peliculas').select('*');
+        // order: sin esto, Postgres no garantiza el orden y una fila recién actualizada puede saltar al final
+        return this.supabase.from('peliculas').select('*').order('titulo');
     }
 
     getGeneros() {
