@@ -1,2 +1,13 @@
-<!-- Provisorio: acá va el alta de películas y funciones (S1B) -->
-<h1>Panel de administración</h1>
+<!-- Marco del panel: menú a la izquierda y, a la derecha, la ruta hija que toque -->
+<div class="panel">
+  <aside class="menu card">
+    <h2>Administración</h2>
+    <nav>
+      <a routerLink="/admin/peliculas/nueva" routerLinkActive="activo">Nueva película</a>
+    </nav>
+  </aside>
+
+  <div class="contenido">
+    <router-outlet />
+  </div>
+</div>

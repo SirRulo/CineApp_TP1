@@ -20,10 +20,17 @@ export const routes: Routes = [
         loadComponent: () => import('./componentes/login/login').then(m => m.Login)
     },
     // canMatch: si el rol no coincide, para ese usuario la ruta "no existe" y termina en '**'
+    // Al estar en el padre, protege también a todas las rutas hijas (children).
     {
         path: 'admin',
         loadComponent: () => import('./componentes/admin/admin').then(m => m.Admin),
-        canMatch: [roleGuard('admin')]
+        canMatch: [roleGuard('admin')],
+        children: [
+            {
+                path: 'peliculas/nueva',
+                loadComponent: () => import('./componentes/alta-pelicula/alta-pelicula').then(m => m.AltaPelicula)
+            }
+        ]
     },
     {
         path: 'empleado',

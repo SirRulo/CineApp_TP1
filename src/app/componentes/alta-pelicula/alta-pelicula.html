@@ -1,0 +1,102 @@
+<section class="alta card">
+  <h2>Nueva película</h2>
+
+  <form [formGroup]="formPelicula" (ngSubmit)="guardar()">
+    <label>
+      Título
+      <input type="text" formControlName="titulo" />
+      @if (formPelicula.controls.titulo.touched && formPelicula.controls.titulo.hasError('required')) {
+        <small>El título es obligatorio</small>
+      }
+    </label>
+
+    <label>
+      Sinopsis
+      <textarea rows="4" formControlName="sinopsis"></textarea>
+      @if (formPelicula.controls.sinopsis.touched && formPelicula.controls.sinopsis.hasError('required')) {
+        <small>La sinopsis es obligatoria</small>
+      } @else if (formPelicula.controls.sinopsis.touched && formPelicula.controls.sinopsis.hasError('minlength')) {
+        <small>Mínimo 10 caracteres</small>
+      }
+    </label>
+
+    <label>
+      URL de la imagen
+      <input type="url" placeholder="https://…" formControlName="imagen_url" />
+      @if (formPelicula.controls.imagen_url.touched && formPelicula.controls.imagen_url.hasError('required')) {
+        <small>La imagen es obligatoria</small>
+      }
+    </label>
+
+    <div class="fila">
+      <label>
+        Duración (min)
+        <input type="number" formControlName="duracion_min" />
+        @if (formPelicula.controls.duracion_min.touched && formPelicula.controls.duracion_min.invalid) {
+          <small>Entre 1 y 400 minutos</small>
+        }
+      </label>
+      <label>
+        Edad mínima
+        <!-- [ngValue] guarda el número (0/13/18); [value] lo guardaría como texto -->
+        <select formControlName="edad_minima">
+          @for (edad of edades; track edad) {
+            <option [ngValue]="edad">{{ edad === 0 ? 'ATP' : '+' + edad }}</option>
+          }
+        </select>
+      </label>
+    </div>
+
+    <!-- Fecha en 3 campos: nada de calendarios desplegables -->
+    <fieldset>
+      <legend>Fecha de estreno</legend>
+      <div class="fila fecha">
+        <input type="number" placeholder="Día" formControlName="dia" />
+        <input type="number" placeholder="Mes" formControlName="mes" />
+        <input type="number" placeholder="Año" formControlName="anio" />
+      </div>
+      @if (formPelicula.controls.dia.touched && formPelicula.controls.dia.invalid) {
+        <small>Día entre 1 y 31</small>
+      } @else if (formPelicula.controls.mes.touched && formPelicula.controls.mes.invalid) {
+        <small>Mes entre 1 y 12</small>
+      } @else if (formPelicula.controls.anio.touched && formPelicula.controls.anio.invalid) {
+        <small>Año inválido</small>
+      }
+    </fieldset>
+
+    <label>
+      Precio de preventa (opcional)
+      <input type="number" placeholder="Vacío = sin preventa" formControlName="precio_preventa" />
+      @if (formPelicula.controls.precio_preventa.touched && formPelicula.controls.precio_preventa.hasError('min')) {
+        <small>No puede ser negativo</small>
+      }
+    </label>
+
+    <fieldset>
+      <legend>Géneros</legend>
+      <div class="generos">
+        @for (genero of generos(); track genero.id) {
+          <label class="check">
+            <input type="checkbox"
+                   [checked]="generosSeleccionados().includes(genero.id)"
+                   (change)="alternarGenero(genero.id)" />
+            {{ genero.nombre }}
+          </label>
+        }
+      </div>
+    </fieldset>
+
+    <label class="check">
+      <input type="checkbox" formControlName="destacada" />
+      Película destacada
+    </label>
+
+    <button type="submit" [disabled]="!formPelicula.valid || generosSeleccionados().length === 0">
+      Guardar película
+    </button>
+
+    @if (mensaje()) {
+      <small [class.ok]="exito()">{{ mensaje() }}</small>
+    }
+  </form>
+</section>

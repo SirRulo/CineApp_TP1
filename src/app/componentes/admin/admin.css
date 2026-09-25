@@ -1,0 +1,46 @@
+.panel {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+  width: min(100% - 2rem, 1100px);
+  margin: 2rem auto;
+}
+
+.menu {
+  flex: 0 0 220px;
+  padding: 1.2rem;
+}
+
+.menu nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.menu a {
+  padding: 0.5rem 0.7rem;
+  border-radius: 10px;
+  color: var(--text-soft);
+}
+
+.menu a.activo {
+  background: var(--surface-strong);
+  color: var(--gold);
+}
+
+.contenido {
+  flex: 1;
+  min-width: 0;
+}
+
+/* En celular el menú va arriba */
+@media (max-width: 720px) {
+  .panel {
+    flex-direction: column;
+  }
+
+  .menu {
+    flex: none;
+    width: 100%;
+  }
+}
