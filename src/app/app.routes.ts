@@ -44,6 +44,14 @@ export const routes: Routes = [
             {
                 path: 'peliculas/editar/:id',
                 loadComponent: () => import('./componentes/alta-pelicula/alta-pelicula').then(m => m.AltaPelicula)
+            },
+            {
+                path: 'funciones',
+                loadComponent: () => import('./componentes/lista-funciones/lista-funciones').then(m => m.ListaFunciones)
+            },
+            {
+                path: 'funciones/nueva',
+                loadComponent: () => import('./componentes/alta-funcion/alta-funcion').then(m => m.AltaFuncion)
             }
         ]
     },
