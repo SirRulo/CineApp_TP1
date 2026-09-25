@@ -37,18 +37,17 @@ export class Login {
       return;
     }
 
-    // 2) Buscar el perfil para saber el rol
-    const perfil = await this.auth.getPerfil(result.data.user.id);
-    if (perfil.error || perfil.data.length === 0) {
+    // 2) Buscar el perfil (para saber el rol) y guardarlo en el estado de sesión del servicio
+    const perfil = await this.auth.cargarPerfil();
+    if (!perfil) {
       this.mensaje.set('No se encontró el perfil del usuario');
       return;
     }
 
     // 3) Redirigir según el rol
-    const rol = perfil.data[0].rol;
-    if (rol === 'admin') {
+    if (perfil.rol === 'admin') {
       this.router.navigate(['/admin']);
-    } else if (rol === 'empleado') {
+    } else if (perfil.rol === 'empleado') {
       this.router.navigate(['/empleado']);
     } else {
       this.router.navigate(['/home']);

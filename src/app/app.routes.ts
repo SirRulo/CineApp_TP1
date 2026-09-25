@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { roleGuard } from './guards/role-guard';
 
 export const routes: Routes = [
     {
@@ -18,14 +19,16 @@ export const routes: Routes = [
         path: 'login',
         loadComponent: () => import('./componentes/login/login').then(m => m.Login)
     },
-    // Sin guards todavía: se agregan en el próximo paso
+    // canMatch: si el rol no coincide, para ese usuario la ruta "no existe" y termina en '**'
     {
         path: 'admin',
-        loadComponent: () => import('./componentes/admin/admin').then(m => m.Admin)
+        loadComponent: () => import('./componentes/admin/admin').then(m => m.Admin),
+        canMatch: [roleGuard('admin')]
     },
     {
         path: 'empleado',
-        loadComponent: () => import('./componentes/empleado/empleado').then(m => m.Empleado)
+        loadComponent: () => import('./componentes/empleado/empleado').then(m => m.Empleado),
+        canMatch: [roleGuard('empleado')]
     },
     // Siempre al final: el router prueba las rutas en orden y '**' atrapa cualquier cosa.
     {

@@ -4,7 +4,20 @@
   <div class="links">
     <!-- routerLinkActive agrega la clase 'active' cuando la URL coincide con el link -->
     <a routerLink="/home" routerLinkActive="active">Home</a>
-    <a routerLink="/login" routerLinkActive="active">Ingresar</a>
-    <a routerLink="/registro" routerLinkActive="active">Registrarse</a>
+
+    <!-- auth.perfil() es un signal: cuando cambia (login/logout), esta parte se vuelve a dibujar -->
+    @if (auth.perfil()) {
+      @if (auth.perfil()?.rol === 'admin') {
+        <a routerLink="/admin" routerLinkActive="active">Admin</a>
+      }
+      @if (auth.perfil()?.rol === 'empleado') {
+        <a routerLink="/empleado" routerLinkActive="active">Empleado</a>
+      }
+      <span class="usuario">Hola, {{ auth.perfil()?.nombre }}</span>
+      <button class="salir" (click)="salir()">Salir</button>
+    } @else {
+      <a routerLink="/login" routerLinkActive="active">Ingresar</a>
+      <a routerLink="/registro" routerLinkActive="active">Registrarse</a>
+    }
   </div>
 </nav>

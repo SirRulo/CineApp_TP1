@@ -95,6 +95,8 @@ export class Registro {
       return;
     }
 
+    // Si Supabase ya dejó la sesión iniciada, el navbar muestra al usuario
+    await this.auth.cargarPerfil();
     this.router.navigate(['/home']);
   }
 }

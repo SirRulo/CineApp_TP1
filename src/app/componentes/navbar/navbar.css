@@ -22,7 +22,18 @@
 
 .links {
 	display: flex;
+	align-items: center;
 	gap: 1.2rem;
+}
+
+.usuario {
+	color: var(--gold);
+	font-weight: 600;
+}
+
+.salir {
+	padding: 0.4rem 0.9rem;
+	font-size: 0.9rem;
 }
 
 .links a {
