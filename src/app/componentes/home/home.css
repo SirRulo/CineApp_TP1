@@ -1,0 +1,27 @@
+.cartelera {
+  width: min(100% - 2rem, 1100px);
+  margin: 2rem auto;
+  animation: riseIn 0.4s ease-out;
+}
+
+h1 {
+  margin: 0 0 1.2rem;
+}
+
+/* Tantas columnas como entren, cada una de al menos 180px */
+.grilla {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1.2rem;
+}
+
+.vacio {
+  color: var(--text-soft);
+}
+
+@media (max-width: 480px) {
+  .grilla {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.8rem;
+  }
+}

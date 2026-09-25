@@ -1,1 +1,18 @@
-<h1>Bienvenidos a CineApp</h1>
+<section class="cartelera">
+  <h1>En cartelera</h1>
+
+  @if (mensaje()) {
+    <small>{{ mensaje() }}</small>
+  }
+
+  @if (peliculas().length > 0) {
+    <div class="grilla">
+      <!-- Una tarjeta por película: [pelicula] baja el dato al hijo (input) -->
+      @for (pelicula of peliculas(); track pelicula.id) {
+        <app-tarjeta-pelicula [pelicula]="pelicula" />
+      }
+    </div>
+  } @else if (!mensaje()) {
+    <p class="vacio">Todavía no hay películas en cartelera.</p>
+  }
+</section>

@@ -16,6 +16,12 @@ export class Peliculas {
         return this.supabase.from('peliculas').select('*').order('titulo');
     }
 
+    // Cartelera: solo las activas; primero las destacadas (true antes que false) y después por título
+    getPeliculasActivas() {
+        return this.supabase.from('peliculas').select('*').eq('activa', true)
+            .order('destacada', { ascending: false }).order('titulo');
+    }
+
     // Como getPerfil: select con filtro → devuelve un arreglo, se lee data[0]
     getPelicula(id: number) {
         return this.supabase.from('peliculas').select('*').eq('id', id);

@@ -1,0 +1,14 @@
+<!-- ?. porque el input puede ser undefined hasta que el padre lo pase (como usuario()?.name del profe) -->
+<a class="tarjeta" [routerLink]="['/pelicula', pelicula()?.id]">
+  <div class="poster">
+    <img [src]="pelicula()?.imagen_url" [alt]="pelicula()?.titulo" />
+    <span class="edad">{{ pelicula()?.edad_minima === 0 ? 'ATP' : '+' + pelicula()?.edad_minima }}</span>
+    @if (pelicula()?.destacada) {
+      <span class="destacada">Destacada</span>
+    }
+  </div>
+  <div class="info">
+    <h3>{{ pelicula()?.titulo }}</h3>
+    <span>{{ pelicula()?.duracion_min }} min</span>
+  </div>
+</a>
