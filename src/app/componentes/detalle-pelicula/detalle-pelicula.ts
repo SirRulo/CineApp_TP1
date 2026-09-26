@@ -1,5 +1,6 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { Component, OnDestroy, OnInit, signal } from '@angular/core';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { Funcion } from '../../models/funcion';
@@ -7,12 +8,13 @@ import { Pelicula } from '../../models/pelicula';
 import { Resena } from '../../models/resena';
 import { Sala } from '../../models/sala';
 import { PromedioPipe } from '../../pipes/promedio-pipe';
+import { Auth } from '../../servicios/auth';
 import { Funciones } from '../../servicios/funciones';
 import { Peliculas } from '../../servicios/peliculas';
 import { Resenas } from '../../servicios/resenas';
 
 @Component({
-  imports: [DatePipe, DecimalPipe, RouterLink, PromedioPipe],
+  imports: [DatePipe, DecimalPipe, RouterLink, PromedioPipe, ReactiveFormsModule],
   selector: 'app-detalle-pelicula',
   styleUrl: './detalle-pelicula.css',
   templateUrl: './detalle-pelicula.html',
@@ -33,6 +35,23 @@ export class DetallePelicula implements OnInit, OnDestroy {
 
   mensaje = signal('');
 
+  // Formulario de reseña (solo con sesión)
+  largoMaximo = 200;
+  mensajeResena = signal('');
+  publicando = signal(false);
+  publicada = signal(false);   // true después de publicar: muestra el "gracias"
+
+  formResena = new FormGroup({
+    // No tiene input: lo carga el botón de la estrella con setValue() (como el día en AltaFuncion)
+    estrellas: new FormControl<number | null>(null, {
+      validators: [Validators.required, Validators.min(1), Validators.max(5)],
+    }),
+    // Opcional: vacío se guarda como null
+    comentario: new FormControl('', {
+      validators: [Validators.maxLength(this.largoMaximo)],
+    }),
+  });
+
   private suscripcionRuta?: Subscription;
 
   constructor(
@@ -40,6 +59,7 @@ export class DetallePelicula implements OnInit, OnDestroy {
     private peliculasService: Peliculas,
     private funcionesService: Funciones,
     private resenasService: Resenas,
+    public auth: Auth,   // public: el HTML lee auth.perfil() (como en Navbar)
   ) {}
 
   ngOnInit() {
@@ -62,6 +82,9 @@ export class DetallePelicula implements OnInit, OnDestroy {
     this.diaElegido.set(null);
     this.funcionElegida.set(null);
     this.resenas.set([]);
+    this.mensajeResena.set('');
+    this.publicada.set(false);
+    this.formResena.reset();
 
     const result = await this.peliculasService.getPelicula(id);
     if (result.error || result.data.length === 0 || !result.data[0].activa) {
@@ -81,6 +104,53 @@ export class DetallePelicula implements OnInit, OnDestroy {
       return; // sin reseñas el detalle se puede ver igual (como los géneros)
     }
     this.resenas.set(result.data);
+  }
+
+  // Primera barrera contra la reseña repetida: si ya hay una suya en la lista, no se muestra el formulario
+  yaReseno() {
+    const perfil = this.auth.perfil();
+    if (!perfil) {
+      return false;
+    }
+    return this.resenas().some(r => r.usuario_id === perfil.id);
+  }
+
+  elegirEstrellas(cantidad: number) {
+    this.formResena.controls.estrellas.setValue(cantidad);
+  }
+
+  async publicarResena() {
+    const perfil = this.auth.perfil();
+    const pelicula = this.pelicula();
+    if (!perfil || !pelicula || this.formResena.invalid) {
+      return;
+    }
+    this.publicando.set(true);
+    this.mensajeResena.set('');
+
+    const v = this.formResena.value;
+    const result = await this.resenasService.addResena({
+      pelicula_id: pelicula.id!,
+      usuario_id: perfil.id,
+      estrellas: v.estrellas!,
+      comentario: v.comentario?.trim() || null,   // '' o solo espacios → null
+    });
+    this.publicando.set(false);
+
+    if (result.error) {
+      // Segunda barrera: el unique (pelicula_id, usuario_id) de la base
+      if (result.error.code === '23505') {
+        this.mensajeResena.set('Ya dejaste una reseña de esta película');
+      } else {
+        this.mensajeResena.set('No se pudo publicar la reseña. Probá de nuevo.');
+      }
+      return;
+    }
+
+    this.publicada.set(true);
+    this.formResena.reset();
+    // Nuevo arreglo en el signal → el pipe promedio se recalcula solo
+    await this.cargarResenas(pelicula.id!);
   }
 
   // Ej.: 4 → '★★★★☆' (llenas + vacías, siempre 5)

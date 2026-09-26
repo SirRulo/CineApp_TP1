@@ -42,6 +42,46 @@
       } @empty {
         <p class="vacio">Todavía no hay reseñas de esta película.</p>
       }
+
+      <!-- Dejar reseña: solo con sesión y una sola vez por película -->
+      <div class="dejar-resena">
+        @if (!auth.perfil()) {
+          <p class="vacio"><a routerLink="/login">Ingresá</a> para dejar tu reseña.</p>
+        } @else if (publicada()) {
+          <p class="gracias">¡Gracias por tu reseña!</p>
+        } @else if (yaReseno()) {
+          <p class="vacio">Ya dejaste tu reseña de esta película.</p>
+        } @else {
+          <form [formGroup]="formResena" (ngSubmit)="publicarResena()">
+            <h3>Tu reseña</h3>
+
+            <div class="elegir-estrellas">
+              @for (n of [1, 2, 3, 4, 5]; track n) {
+                <button type="button" class="estrella"
+                        [class.llena]="(formResena.controls.estrellas.value ?? 0) >= n"
+                        (click)="elegirEstrellas(n)">★</button>
+              }
+            </div>
+
+            <textarea formControlName="comentario" rows="3"
+                      placeholder="Comentario (opcional)"></textarea>
+            <div class="pie-form">
+              @if (formResena.controls.comentario.hasError('maxlength')) {
+                <small>Máximo {{ largoMaximo }} caracteres</small>
+              } @else if (mensajeResena()) {
+                <small>{{ mensajeResena() }}</small>
+              }
+              <span class="contador">
+                {{ formResena.controls.comentario.value?.length ?? 0 }}/{{ largoMaximo }}
+              </span>
+            </div>
+
+            <button type="submit" [disabled]="formResena.invalid || publicando()">
+              {{ publicando() ? 'Publicando…' : 'Publicar' }}
+            </button>
+          </form>
+        }
+      </div>
     </div>
 
     <div class="funciones card">

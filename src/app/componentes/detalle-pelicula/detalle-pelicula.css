@@ -106,6 +106,72 @@
   margin: 0.3rem 0 0;
 }
 
+/* Formulario de reseña */
+.dejar-resena {
+  padding-top: 1rem;
+  border-top: 1px solid rgba(167, 171, 192, 0.15);
+}
+
+.dejar-resena form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.dejar-resena h3 {
+  margin: 0;
+}
+
+.dejar-resena form > button {
+  align-self: flex-start;
+}
+
+.gracias {
+  color: var(--gold);
+  margin: 0;
+}
+
+/* Estrellas como botones: vacías en gris, llenas en dorado (pisa el button global) */
+button.estrella {
+  background: none;
+  border: none;
+  box-shadow: none;
+  padding: 0 0.1rem;
+  font-size: 1.8rem;
+  line-height: 1;
+  color: var(--text-soft);
+  opacity: 0.4;
+}
+
+button.estrella.llena {
+  color: var(--gold);
+  opacity: 1;
+}
+
+/* textarea no tiene estilo global: se copia el de AltaPelicula */
+textarea {
+  width: 100%;
+  border: 1px solid rgba(167, 171, 192, 0.25);
+  border-radius: 12px;
+  padding: 0.72rem 0.84rem;
+  font: inherit;
+  color: var(--text-main);
+  background: var(--surface-strong);
+  resize: vertical;
+}
+
+.pie-form {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.contador {
+  margin-left: auto;
+  color: var(--text-soft);
+  font-size: 0.8rem;
+}
+
 .funciones {
   padding: 1.5rem;
   display: flex;
