@@ -1,0 +1,85 @@
+<section class="compra">
+  @if (codigo(); as cod) {
+    <!-- 3) Confirmación -->
+    <div class="confirmacion card">
+      <h1>¡Compra lista!</h1>
+      <p>Mostrá este código en la entrada del cine:</p>
+      <div class="codigo">{{ cod }}</div>
+
+      @if (comprado(); as c) {
+        <p class="datos">
+          {{ c.pelicula?.titulo }} · {{ c.funcion.inicio | date: 'dd/MM HH:mm' }} ·
+          {{ c.funcion.formato }}
+        </p>
+        <p class="datos">
+          Butacas:
+          @for (e of c.butacas; track e.butaca.id) {
+            <span class="butaca">{{ e.butaca.fila }}{{ e.butaca.numero }}</span>
+          }
+        </p>
+      }
+      <p class="datos">Total pagado: <strong>{{ totalPagado() | currency }}</strong></p>
+
+      <a routerLink="/home">Volver a la cartelera</a>
+    </div>
+  } @else if (contenido(); as c) {
+    <!-- 1) Resumen y 2) pago -->
+    <a [routerLink]="['/funcion', c.funcion.id]" class="volver">← Cambiar butacas</a>
+    <h1>Confirmá tu compra</h1>
+
+    <div class="resumen card">
+      <p class="datos">
+        <strong>{{ c.pelicula?.titulo }}</strong> ·
+        {{ c.funcion.inicio | date: 'dd/MM HH:mm' }} · {{ c.funcion.formato }} ·
+        {{ c.funcion.idioma === 'castellano' ? 'Castellano' : 'Subtitulada' }}
+      </p>
+
+      <ul>
+        @for (e of c.butacas; track e.butaca.id) {
+          <li>
+            <span>
+              Fila {{ e.butaca.fila }} · Butaca {{ e.butaca.numero }}
+              @if (e.butaca.tipo === 'vip') {
+                <em class="vip">VIP</em>
+              }
+            </span>
+            <span>{{ e.precio | currency }}</span>
+          </li>
+        }
+      </ul>
+
+      <div class="linea">
+        <span>Subtotal</span>
+        <span>{{ subtotal() | currency }}</span>
+      </div>
+      @if (cupon(); as cup) {
+        <div class="linea cupon">
+          <span>Cupón {{ cup.codigo }} ({{ cup.porcentaje }} %)</span>
+          <span>− {{ descuento() | currency }}</span>
+        </div>
+      } @else if (!usuarioId()) {
+        <p class="aviso">Si tenés cuenta e ingresás, tu primera compra tiene descuento.</p>
+      }
+      <div class="linea total">
+        <span>Total</span>
+        <strong>{{ totalAPagar() | currency }}</strong>
+      </div>
+
+      <p class="aviso">Pago simulado: no se piden datos de tarjeta.</p>
+      <button type="button" [disabled]="pagando()" (click)="pagar()">
+        {{ pagando() ? 'Procesando…' : 'Pagar' }}
+      </button>
+    </div>
+  } @else {
+    <!-- Carrito vacío (por ejemplo, se recargó la página) -->
+    <div class="vacio card">
+      <h1>No hay nada para comprar</h1>
+      <p>Elegí una película, un horario y tus butacas.</p>
+      <a routerLink="/home">Ir a la cartelera</a>
+    </div>
+  }
+
+  @if (mensaje()) {
+    <small>{{ mensaje() }}</small>
+  }
+</section>

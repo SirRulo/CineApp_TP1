@@ -21,6 +21,11 @@ export const routes: Routes = [
         path: 'funcion/:id',
         loadComponent: () => import('./componentes/seleccion-butacas/seleccion-butacas').then(m => m.SeleccionButacas)
     },
+    // Pago de lo que quedó en el carrito (también sin cuenta)
+    {
+        path: 'compra',
+        loadComponent: () => import('./componentes/compra/compra').then(m => m.Compra)
+    },
     {
         path: 'registro',
         loadComponent: () => import('./componentes/registro/registro').then(m => m.Registro)
