@@ -1,15 +1,18 @@
-import { DatePipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { Funcion } from '../../models/funcion';
 import { Pelicula } from '../../models/pelicula';
+import { Resena } from '../../models/resena';
 import { Sala } from '../../models/sala';
+import { PromedioPipe } from '../../pipes/promedio-pipe';
 import { Funciones } from '../../servicios/funciones';
 import { Peliculas } from '../../servicios/peliculas';
+import { Resenas } from '../../servicios/resenas';
 
 @Component({
-  imports: [DatePipe, RouterLink],
+  imports: [DatePipe, DecimalPipe, RouterLink, PromedioPipe],
   selector: 'app-detalle-pelicula',
   styleUrl: './detalle-pelicula.css',
   templateUrl: './detalle-pelicula.html',
@@ -21,6 +24,7 @@ export class DetallePelicula implements OnInit, OnDestroy {
   generos = signal<string[]>([]);
   funciones = signal<Funcion[]>([]);
   salas = signal<Sala[]>([]);
+  resenas = signal<Resena[]>([]);
 
   // Días distintos que tienen funciones (a las 00:00), para los botones de día
   dias = signal<Date[]>([]);
@@ -35,6 +39,7 @@ export class DetallePelicula implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private peliculasService: Peliculas,
     private funcionesService: Funciones,
+    private resenasService: Resenas,
   ) {}
 
   ngOnInit() {
@@ -56,6 +61,7 @@ export class DetallePelicula implements OnInit, OnDestroy {
     this.pelicula.set(null);
     this.diaElegido.set(null);
     this.funcionElegida.set(null);
+    this.resenas.set([]);
 
     const result = await this.peliculasService.getPelicula(id);
     if (result.error || result.data.length === 0 || !result.data[0].activa) {
@@ -65,7 +71,21 @@ export class DetallePelicula implements OnInit, OnDestroy {
     this.pelicula.set(result.data[0]);
 
     await this.cargarGeneros(id);
+    await this.cargarResenas(id);
     await this.cargarFunciones(id);
+  }
+
+  private async cargarResenas(id: number) {
+    const result = await this.resenasService.getResenasDePelicula(id);
+    if (result.error) {
+      return; // sin reseñas el detalle se puede ver igual (como los géneros)
+    }
+    this.resenas.set(result.data);
+  }
+
+  // Ej.: 4 → '★★★★☆' (llenas + vacías, siempre 5)
+  dibujarEstrellas(cantidad: number) {
+    return '★'.repeat(cantidad) + '☆'.repeat(5 - cantidad);
   }
 
   // pelicula_generos solo tiene ids: se cruzan con la lista de géneros para tener los nombres

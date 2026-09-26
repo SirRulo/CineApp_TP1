@@ -51,6 +51,61 @@
   color: var(--text-soft);
 }
 
+/* Reseñas: promedio en dorado arriba a la derecha, cada reseña separada por una línea */
+.resenas {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.resenas h2 {
+  margin: 0;
+}
+
+.encabezado {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+}
+
+.promedio {
+  color: var(--gold);
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.promedio small {
+  color: var(--text-soft);
+  font-size: 0.85rem;
+  font-weight: 400;
+}
+
+.resena {
+  padding-top: 0.8rem;
+  border-top: 1px solid rgba(167, 171, 192, 0.15);
+}
+
+.autor {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--text-soft);
+  font-size: 0.85rem;
+}
+
+.estrellas {
+  color: var(--gold);
+  font-size: 1.05rem;
+  letter-spacing: 0.1em;
+}
+
+.resena p {
+  margin: 0.3rem 0 0;
+}
+
 .funciones {
   padding: 1.5rem;
   display: flex;

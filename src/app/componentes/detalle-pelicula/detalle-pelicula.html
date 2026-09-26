@@ -17,6 +17,33 @@
       </div>
     </div>
 
+    <!-- Reseñas: se ven antes de elegir función (lo pide el cliente) -->
+    <div class="resenas card">
+      <div class="encabezado">
+        <h2>Reseñas</h2>
+        @if (resenas().length > 0) {
+          <span class="promedio">
+            ★ {{ resenas() | promedio | number: '1.1-1' }}
+            <small>({{ resenas().length }} {{ resenas().length === 1 ? 'reseña' : 'reseñas' }})</small>
+          </span>
+        }
+      </div>
+
+      @for (resena of resenas(); track resena.id) {
+        <div class="resena">
+          <div class="autor">
+            <span class="estrellas">{{ dibujarEstrellas(resena.estrellas) }}</span>
+            <span>Espectador · {{ resena.created_at | date: 'dd/MM/yyyy' }}</span>
+          </div>
+          @if (resena.comentario) {
+            <p>{{ resena.comentario }}</p>
+          }
+        </div>
+      } @empty {
+        <p class="vacio">Todavía no hay reseñas de esta película.</p>
+      }
+    </div>
+
     <div class="funciones card">
       <h2>Funciones</h2>
 
