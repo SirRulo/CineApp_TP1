@@ -16,6 +16,11 @@ export const routes: Routes = [
         path: 'pelicula/:id',
         loadComponent: () => import('./componentes/detalle-pelicula/detalle-pelicula').then(m => m.DetallePelicula)
     },
+    // Mapa de butacas de una función (se puede entrar sin cuenta: la compra anónima está permitida)
+    {
+        path: 'funcion/:id',
+        loadComponent: () => import('./componentes/seleccion-butacas/seleccion-butacas').then(m => m.SeleccionButacas)
+    },
     {
         path: 'registro',
         loadComponent: () => import('./componentes/registro/registro').then(m => m.Registro)

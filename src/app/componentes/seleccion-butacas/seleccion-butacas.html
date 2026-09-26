@@ -1,0 +1,56 @@
+<section class="butacas">
+  @if (pelicula(); as p) {
+    <a [routerLink]="['/pelicula', p.id]" class="volver">← {{ p.titulo }}</a>
+  } @else {
+    <a routerLink="/home" class="volver">← Cartelera</a>
+  }
+
+  @if (funcion(); as f) {
+    <div class="encabezado">
+      <h1>Elegí tus butacas</h1>
+      <p>
+        {{ pelicula()?.titulo }} · {{ f.inicio | date: 'dd/MM HH:mm' }} ·
+        {{ f.formato }} · {{ f.idioma === 'castellano' ? 'Castellano' : 'Subtitulada' }}
+      </p>
+    </div>
+
+    <div class="sala card">
+      <div class="pantalla">Pantalla</div>
+
+      <!-- Si no entra a lo ancho (celular), el mapa se desplaza solo dentro de este recuadro -->
+      <div class="mapa">
+        @for (fila of filas(); track fila.letra) {
+          <div class="fila" [class.despues-pasillo]="fila.letra === 'L'">
+            <span class="letra">{{ fila.letra }}</span>
+            @for (b of fila.posiciones; track $index) {
+              @if (b) {
+                <app-asiento [butaca]="b"
+                             [ocupada]="estaOcupada(b)"
+                             [seleccionada]="estaSeleccionada(b)"
+                             (elegida)="alternar($event)" />
+              } @else {
+                <span class="hueco"></span>
+              }
+            }
+            <span class="letra">{{ fila.letra }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="leyenda">
+        <span><i class="libre"></i> Libre</span>
+        <span><i class="vip"></i> VIP</span>
+        <span><i class="accesible"></i> Accesible</span>
+        <span><i class="elegida"></i> Elegida</span>
+        <span><i class="ocupada"></i> Ocupada</span>
+      </div>
+    </div>
+
+    <!-- Provisorio: el resumen con el total se arma en el paso 3b-2 -->
+    <p class="contador">Elegiste {{ seleccionadas().length }} de {{ maximo }} butacas</p>
+  }
+
+  @if (mensaje()) {
+    <small>{{ mensaje() }}</small>
+  }
+</section>

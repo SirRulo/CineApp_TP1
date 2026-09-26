@@ -1,0 +1,12 @@
+<button type="button"
+        [ngClass]="{
+          ocupada: ocupada(),
+          seleccionada: seleccionada(),
+          accesible: butaca()?.tipo === 'accesible',
+          vip: butaca()?.tipo === 'vip'
+        }"
+        [disabled]="ocupada()"
+        [title]="butaca()?.fila + '' + butaca()?.numero"
+        (click)="elegir()">
+  {{ butaca()?.numero }}
+</button>

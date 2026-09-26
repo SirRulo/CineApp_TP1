@@ -46,14 +46,14 @@
           }
         </div>
 
-        <!-- 3) Seguir a las butacas: se conecta en el paso 3 -->
+        <!-- 3) Seguir a las butacas de la función elegida -->
         @if (funcionElegida(); as f) {
           <div class="resumen">
             <span>
               {{ f.inicio | date: 'dd/MM HH:mm' }} · {{ salaDe(f.sala_id) }} · {{ f.formato }} ·
               desde $ {{ f.precio }}
             </span>
-            <button type="button" disabled>Elegir butacas</button>
+            <button type="button" [routerLink]="['/funcion', f.id]">Elegir butacas</button>
           </div>
         }
       } @else if (!mensaje()) {

@@ -1,0 +1,42 @@
+/* Butaca chica: se pisan los estilos globales de button (gradiente, sombra, padding) */
+button {
+  width: 1.6rem;
+  height: 1.6rem;
+  padding: 0;
+  border-radius: 6px 6px 3px 3px;
+  font-size: 0.65rem;
+  font-weight: 500;
+  background: var(--surface-strong);
+  color: var(--text-soft);
+  border: 1px solid rgba(167, 171, 192, 0.3);
+  box-shadow: none;
+}
+
+button:hover {
+  transform: none;
+  box-shadow: none;
+  border-color: var(--gold);
+}
+
+.vip {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.accesible {
+  border-color: var(--accesible);
+  color: var(--accesible);
+}
+
+.seleccionada {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
+  border-color: var(--gold);
+  color: #fff;
+}
+
+/* disabled ya baja la opacidad (styles.css); acá se apaga del todo */
+.ocupada {
+  background: var(--bg-0);
+  border-color: transparent;
+  color: transparent;
+}
