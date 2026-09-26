@@ -15,6 +15,29 @@ h1 {
   gap: 1.2rem;
 }
 
+/* Top 3: separado de la cartelera */
+.grilla.top {
+  margin-bottom: 2.5rem;
+}
+
+/* El número del puesto va encima de la esquina de la tarjeta */
+.puesto {
+  position: relative;
+}
+
+.numero {
+  position: absolute;
+  top: -0.9rem;
+  left: -0.6rem;
+  z-index: 1;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 3.4rem;
+  line-height: 1;
+  color: var(--gold);
+  text-shadow: 0 4px 14px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+}
+
 .vacio {
   color: var(--text-soft);
 }

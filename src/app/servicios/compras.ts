@@ -34,6 +34,12 @@ export class Compras {
             .eq('usuario_id', usuarioId).eq('estado', 'pagada');
     }
 
+    // Para el top 3: solo el funcion_id de cada entrada activa (una cancelada no cuenta como vendida).
+    // La cuenta por película se hace en Home (group by / count no están en el material).
+    getEntradasVendidas() {
+        return this.supabase.from('entradas').select('funcion_id').eq('estado', 'activa');
+    }
+
     // El porcentaje sale de la tabla y no del código: el admin lo puede cambiar (S3)
     getCuponPrimeraCompra() {
         return this.supabase.from('cupones').select('*')

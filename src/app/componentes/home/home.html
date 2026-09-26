@@ -1,4 +1,17 @@
 <section class="cartelera">
+  <!-- Top 3: solo aparece si ya hay entradas vendidas -->
+  @if (top3().length > 0) {
+    <h1>Las más vistas</h1>
+    <div class="grilla top">
+      @for (pelicula of top3(); track pelicula.id; let i = $index) {
+        <div class="puesto">
+          <span class="numero">{{ i + 1 }}</span>
+          <app-tarjeta-pelicula [pelicula]="pelicula" />
+        </div>
+      }
+    </div>
+  }
+
   <h1>En cartelera</h1>
 
   @if (mensaje()) {
