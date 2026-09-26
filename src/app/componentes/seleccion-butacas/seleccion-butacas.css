@@ -114,6 +114,73 @@
   opacity: 0.5;
 }
 
-.contador {
+.resumen {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.resumen h2 {
+  margin: 0;
+}
+
+.resumen h2 span {
+  font-family: 'Outfit', 'Trebuchet MS', sans-serif;
+  font-size: 0.9rem;
+  letter-spacing: 0;
   color: var(--text-soft);
+}
+
+.resumen ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.resumen li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid rgba(167, 171, 192, 0.12);
+}
+
+/* Etiquetas VIP / Accesible: el aviso claro antes de pagar que pide S9 */
+.resumen em {
+  margin-left: 0.4rem;
+  padding: 0 0.45rem;
+  border-radius: 999px;
+  border: 1px solid;
+  font-style: normal;
+  font-size: 0.75rem;
+}
+
+.resumen em.vip {
+  color: var(--gold);
+}
+
+.resumen em.accesible {
+  color: var(--accesible);
+}
+
+.total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 1.1rem;
+}
+
+.total strong {
+  font-size: 1.5rem;
+  color: var(--gold);
+}
+
+.vacio {
+  color: var(--text-soft);
+  margin: 0;
+}
+
+.resumen button {
+  align-self: flex-end;
 }

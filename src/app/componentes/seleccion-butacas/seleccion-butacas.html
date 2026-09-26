@@ -46,8 +46,39 @@
       </div>
     </div>
 
-    <!-- Provisorio: el resumen con el total se arma en el paso 3b-2 -->
-    <p class="contador">Elegiste {{ seleccionadas().length }} de {{ maximo }} butacas</p>
+    <!-- Resumen: butacas elegidas, precio de cada una y total -->
+    <div class="resumen card">
+      <h2>Tu selección <span>({{ seleccionadas().length }} de {{ maximo }})</span></h2>
+
+      @if (seleccionadas().length > 0) {
+        <ul>
+          @for (b of seleccionadas(); track b.id) {
+            <li>
+              <span>
+                Fila {{ b.fila }} · Butaca {{ b.numero }}
+                @if (b.tipo === 'vip') {
+                  <em class="vip">VIP</em>
+                }
+                @if (b.tipo === 'accesible') {
+                  <em class="accesible">Accesible</em>
+                }
+              </span>
+              <span>{{ precioDe(b) | currency }}</span>
+            </li>
+          }
+        </ul>
+
+        <div class="total">
+          <span>Total</span>
+          <strong>{{ total() | currency }}</strong>
+        </div>
+      } @else {
+        <p class="vacio">Tocá una butaca libre del mapa para elegirla.</p>
+      }
+
+      <!-- Se habilita en el paso 4 (compra) -->
+      <button type="button" disabled>Continuar</button>
+    </div>
   }
 
   @if (mensaje()) {

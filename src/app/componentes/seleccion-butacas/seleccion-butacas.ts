@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { CurrencyPipe, DatePipe } from '@angular/common';
 import { Component, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Butaca } from '../../models/butaca';
@@ -15,7 +15,7 @@ interface Fila {
 }
 
 @Component({
-  imports: [Asiento, DatePipe, RouterLink],
+  imports: [Asiento, CurrencyPipe, DatePipe, RouterLink],
   selector: 'app-seleccion-butacas',
   styleUrl: './seleccion-butacas.css',
   templateUrl: './seleccion-butacas.html',
@@ -103,5 +103,23 @@ export class SeleccionButacas implements OnInit {
     } else {
       this.seleccionadas.set([...this.seleccionadas(), b]);
     }
+  }
+
+  // El precio lo fija la función: las VIP (filas R, S, T) usan precio_vip, el resto precio
+  precioDe(b: Butaca) {
+    const funcion = this.funcion();
+    if (!funcion) {
+      return 0;
+    }
+    return b.tipo === 'vip' ? funcion.precio_vip : funcion.precio;
+  }
+
+  // Suma de los precios de las butacas elegidas
+  total() {
+    let suma = 0;
+    for (const b of this.seleccionadas()) {
+      suma += this.precioDe(b);
+    }
+    return suma;
   }
 }
