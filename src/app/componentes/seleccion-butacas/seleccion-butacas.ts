@@ -1,9 +1,10 @@
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { Component, OnInit, signal } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Butaca } from '../../models/butaca';
 import { Funcion } from '../../models/funcion';
 import { Pelicula } from '../../models/pelicula';
+import { Carrito } from '../../servicios/carrito';
 import { Funciones } from '../../servicios/funciones';
 import { Peliculas } from '../../servicios/peliculas';
 import { Asiento } from '../asiento/asiento';
@@ -32,8 +33,10 @@ export class SeleccionButacas implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private funcionesService: Funciones,
     private peliculasService: Peliculas,
+    private carrito: Carrito,
   ) {}
 
   // snapshot alcanza: para cambiar de función se vuelve al detalle y el componente se recrea
@@ -121,5 +124,20 @@ export class SeleccionButacas implements OnInit {
       suma += this.precioDe(b);
     }
     return suma;
+  }
+
+  // Deja la selección en el carrito (servicio compartido) y pasa a la pantalla de compra
+  continuar() {
+    const funcion = this.funcion();
+    if (!funcion || this.seleccionadas().length === 0) {
+      return;
+    }
+    this.carrito.cargar({
+      funcion: funcion,
+      pelicula: this.pelicula(),
+      butacas: this.seleccionadas().map(b => ({ butaca: b, precio: this.precioDe(b) })),
+      total: this.total(),
+    });
+    this.router.navigate(['/compra']);
   }
 }
