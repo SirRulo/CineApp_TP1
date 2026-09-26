@@ -52,6 +52,12 @@ export class Peliculas {
         return this.supabase.from('pelicula_generos').select('genero_id').eq('pelicula_id', peliculaId);
     }
 
+    // Toda la tabla de relación en una sola consulta (para el buscador de la cartelera):
+    // [{ pelicula_id: 1, genero_id: 3 }, { pelicula_id: 1, genero_id: 5 }, { pelicula_id: 2, genero_id: 3 }, ...]
+    getTodosLosGenerosDePeliculas() {
+        return this.supabase.from('pelicula_generos').select('*');
+    }
+
     // Borra las filas de la tabla de relación (no la película): se usa al editar,
     // antes de volver a insertar los géneros tildados.
     deleteGenerosDePelicula(peliculaId: number) {

@@ -38,6 +38,57 @@ h1 {
   pointer-events: none;
 }
 
+/* Buscador */
+.buscador {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-bottom: 1.5rem;
+}
+
+.buscador input {
+  max-width: 420px;
+}
+
+.generos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+/* Géneros como chips: discretos, solo se pinta el elegido (pisa el button global) */
+button.genero,
+button.limpiar {
+  padding: 0.3rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  box-shadow: none;
+}
+
+button.genero {
+  background: var(--surface-strong);
+  color: var(--text-soft);
+  border: 1px solid rgba(167, 171, 192, 0.25);
+}
+
+button.genero.elegido {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
+  color: var(--text-main);
+  border-color: var(--gold);
+}
+
+button.limpiar {
+  background: none;
+  color: var(--gold);
+  border: 1px solid transparent;
+}
+
+/* El mensaje de "sin resultados" ocupa toda la fila de la grilla */
+.grilla .vacio {
+  grid-column: 1 / -1;
+}
+
 .vacio {
   color: var(--text-soft);
 }

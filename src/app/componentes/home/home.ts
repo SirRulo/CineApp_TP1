@@ -1,12 +1,15 @@
 import { Component, OnInit, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { Genero } from '../../models/genero';
 import { Pelicula } from '../../models/pelicula';
+import { FiltroPipe } from '../../pipes/filtro-pipe';
 import { Compras } from '../../servicios/compras';
 import { Funciones } from '../../servicios/funciones';
 import { Peliculas } from '../../servicios/peliculas';
 import { TarjetaPelicula } from '../tarjeta-pelicula/tarjeta-pelicula';
 
 @Component({
-  imports: [TarjetaPelicula],
+  imports: [TarjetaPelicula, FormsModule, FiltroPipe],
   selector: 'app-home',
   styleUrl: './home.css',
   templateUrl: './home.html',
@@ -15,6 +18,12 @@ export class Home implements OnInit {
   peliculas = signal<Pelicula[]>([]);
   top3 = signal<Pelicula[]>([]);
   mensaje = signal('');
+
+  // Buscador (como pipes/app.ts del profe: signal + [(ngModel)])
+  busqueda = signal('');
+  generos = signal<Genero[]>([]);
+  generosElegidos = signal<number[]>([]);
+  generosPorPelicula = signal<{ [peliculaId: number]: number[] }>({});
 
   constructor(
     private peliculasService: Peliculas,
@@ -31,6 +40,39 @@ export class Home implements OnInit {
     this.peliculas.set(result.data);
 
     await this.cargarTop3();
+    await this.cargarGeneros();
+  }
+
+  // Géneros para los botones + qué géneros tiene cada película (para el pipe filtro)
+  private async cargarGeneros() {
+    const generos = await this.peliculasService.getGeneros();
+    const relaciones = await this.peliculasService.getTodosLosGenerosDePeliculas();
+    if (generos.error || relaciones.error) {
+      return; // sin géneros el buscador funciona igual, solo por texto
+    }
+    this.generos.set(generos.data);
+
+    // porPelicula[peliculaId] = [genero_id, genero_id, ...] (mismo patrón que ventas del top 3)
+    const porPelicula: { [peliculaId: number]: number[] } = {};
+    for (const fila of relaciones.data) {
+      porPelicula[fila.pelicula_id] = [...(porPelicula[fila.pelicula_id] ?? []), fila.genero_id];
+    }
+    this.generosPorPelicula.set(porPelicula);
+  }
+
+  // Arreglo nuevo (nunca push): el pipe es puro y solo se recalcula si cambia la referencia
+  alternarGenero(id: number) {
+    const actuales = this.generosElegidos();
+    if (actuales.includes(id)) {
+      this.generosElegidos.set(actuales.filter(g => g !== id));
+    } else {
+      this.generosElegidos.set([...actuales, id]);
+    }
+  }
+
+  limpiarFiltros() {
+    this.busqueda.set('');
+    this.generosElegidos.set([]);
   }
 
   // Las 3 películas con más entradas vendidas. Las entradas solo tienen funcion_id,

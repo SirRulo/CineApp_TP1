@@ -19,10 +19,27 @@
   }
 
   @if (peliculas().length > 0) {
+    <!-- Buscador: texto + géneros como botones (se combinan) -->
+    <div class="buscador">
+      <input type="text" [(ngModel)]="busqueda" placeholder="Buscar por título…" />
+      <div class="generos">
+        @for (genero of generos(); track genero.id) {
+          <button type="button" class="genero"
+                  [class.elegido]="generosElegidos().includes(genero.id)"
+                  (click)="alternarGenero(genero.id)">{{ genero.nombre }}</button>
+        }
+        @if (busqueda() || generosElegidos().length > 0) {
+          <button type="button" class="limpiar" (click)="limpiarFiltros()">Limpiar</button>
+        }
+      </div>
+    </div>
+
     <div class="grilla">
       <!-- Una tarjeta por película: [pelicula] baja el dato al hijo (input) -->
-      @for (pelicula of peliculas(); track pelicula.id) {
+      @for (pelicula of peliculas() | filtro: busqueda() : generosElegidos() : generosPorPelicula(); track pelicula.id) {
         <app-tarjeta-pelicula [pelicula]="pelicula" />
+      } @empty {
+        <p class="vacio">No hay películas que coincidan con la búsqueda.</p>
       }
     </div>
   } @else if (!mensaje()) {
