@@ -5,7 +5,7 @@ Alumno: Franco Barbizan
 
 Aplicación web para un cine: cartelera, compra de entradas con selección de butacas, reseñas, panel de administración (películas y funciones) y panel de empleados.
 
-- **App desplegada:** _(URL de Vercel)_
+- **App desplegada:** https://cine-app-flax.vercel.app
 - **Repositorio:** https://github.com/SirRulo/CineApp_TP1
 
 ---
