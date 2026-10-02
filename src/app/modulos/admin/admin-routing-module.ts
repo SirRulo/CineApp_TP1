@@ -58,6 +58,10 @@ const routes: Routes = [
             {
                 path: 'cupones',
                 loadComponent: () => import('../../componentes/lista-cupones/lista-cupones').then(m => m.ListaCupones)
+            },
+            {
+                path: 'reportes',
+                loadComponent: () => import('../../componentes/reporte-facturacion/reporte-facturacion').then(m => m.ReporteFacturacion)
             }
         ]
     }

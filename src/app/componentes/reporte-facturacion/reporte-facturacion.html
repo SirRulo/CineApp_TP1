@@ -1,0 +1,53 @@
+<section class="reporte card">
+  <h2>Facturación por día</h2>
+  <p class="ayuda">Solo compras pagadas (las canceladas no cuentan). Entradas = entradas activas de esas compras.</p>
+
+  <!-- Período con botones (nada de calendario) -->
+  <div class="periodos">
+    @for (p of periodos; track p.dias) {
+      <button type="button" class="periodo" [class.elegido]="periodo() === p.dias" (click)="elegirPeriodo(p.dias)">
+        {{ p.nombre }}
+      </button>
+    }
+  </div>
+
+  @if (mensaje()) {
+    <small>{{ mensaje() }}</small>
+  }
+
+  @if (filas().length > 0) {
+    <div class="tabla">
+      <!-- Tabla como lista-usuarios de inputOutput -->
+      <table>
+        <thead>
+          <tr>
+            <th>Día</th>
+            <th>Compras</th>
+            <th>Entradas</th>
+            <th>Facturación</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (f of filas(); track f.dia.getTime()) {
+            <tr>
+              <td>{{ f.dia | date: 'dd/MM/yyyy' }}</td>
+              <td>{{ f.compras }}</td>
+              <td>{{ f.entradas }}</td>
+              <td>{{ f.facturacion | currency }}</td>
+            </tr>
+          }
+        </tbody>
+        <tfoot>
+          <tr>
+            <td>Total</td>
+            <td>{{ totalCompras() }}</td>
+            <td>{{ totalEntradas() }}</td>
+            <td>{{ totalFacturacion() | currency }}</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  } @else if (!mensaje()) {
+    <p class="vacio">No hay ventas en este período.</p>
+  }
+</section>

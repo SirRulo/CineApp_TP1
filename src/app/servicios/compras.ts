@@ -72,6 +72,19 @@ export class Compras {
             .eq('usuario_id', usuarioId).eq('estado', 'pagada');
     }
 
+    // ---------- Reportes del admin (S6) ----------
+
+    // Compras pagadas (las canceladas no facturan): fecha y total, de la más vieja a la más nueva
+    getComprasParaReporte() {
+        return this.supabase.from('compras').select('id, created_at, total')
+            .eq('estado', 'pagada').order('created_at');
+    }
+
+    // compra_id de cada entrada activa: para contar cuántas entradas tiene cada compra
+    getEntradasActivas() {
+        return this.supabase.from('entradas').select('compra_id').eq('estado', 'activa');
+    }
+
     // Para el top 3: solo el funcion_id de cada entrada activa (una cancelada no cuenta como vendida).
     // La cuenta por película se hace en Home (group by / count no están en el material).
     getEntradasVendidas() {
