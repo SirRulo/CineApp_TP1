@@ -254,3 +254,11 @@ button.opcion.elegido span {
     align-items: stretch;
   }
 }
+
+/* Link solo para el admin (*appAdmin): discreto, en dorado */
+.editar {
+  display: inline-block;
+  margin-top: 0.4rem;
+  color: var(--gold);
+  font-weight: 600;
+}

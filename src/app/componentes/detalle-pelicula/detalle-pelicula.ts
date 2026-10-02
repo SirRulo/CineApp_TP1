@@ -3,6 +3,7 @@ import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { AdminDirective } from '../../directivas/admin.directive';
 import { Funcion } from '../../models/funcion';
 import { Pelicula } from '../../models/pelicula';
 import { Resena } from '../../models/resena';
@@ -14,7 +15,7 @@ import { Peliculas } from '../../servicios/peliculas';
 import { Resenas } from '../../servicios/resenas';
 
 @Component({
-  imports: [DatePipe, DecimalPipe, RouterLink, PromedioPipe, ReactiveFormsModule],
+  imports: [DatePipe, DecimalPipe, RouterLink, PromedioPipe, ReactiveFormsModule, AdminDirective],
   selector: 'app-detalle-pelicula',
   styleUrl: './detalle-pelicula.css',
   templateUrl: './detalle-pelicula.html',
