@@ -73,6 +73,11 @@ export const routes: Routes = [
                 path: 'funciones/nueva',
                 loadComponent: () => import('./componentes/alta-funcion/alta-funcion').then(m => m.AltaFuncion)
             },
+            // Asignación automática de sala (varios días a la vez)
+            {
+                path: 'funciones/programar',
+                loadComponent: () => import('./componentes/programar-funciones/programar-funciones').then(m => m.ProgramarFunciones)
+            },
             {
                 path: 'productos',
                 loadComponent: () => import('./componentes/lista-productos/lista-productos').then(m => m.ListaProductos)

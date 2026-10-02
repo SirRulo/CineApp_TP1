@@ -1,0 +1,98 @@
+<section class="alta card">
+  <h2>Programar funciones</h2>
+  <p class="ayuda">Elegí la película, los días y la hora: la sala la asigna el sistema (la primera libre, respetando los 30 minutos de limpieza).</p>
+
+  <form [formGroup]="formProgramar" (ngSubmit)="programar()">
+    <label>
+      Película
+      <select formControlName="pelicula">
+        <option [ngValue]="null" disabled>Elegí una película</option>
+        @for (pelicula of peliculas(); track pelicula.id) {
+          <option [ngValue]="pelicula">{{ pelicula.titulo }} ({{ pelicula.duracion_min }} min)</option>
+        }
+      </select>
+    </label>
+
+    <!-- Varios días: cada botón se prende y se apaga -->
+    <fieldset>
+      <legend>Días ({{ diasElegidos().length }} elegidos)</legend>
+      <div class="dias">
+        @for (dia of dias; track dia.getTime()) {
+          <button type="button" class="dia" [class.elegido]="estaElegido(dia)" (click)="alternarDia(dia)">
+            <span>{{ nombresDias[dia.getDay()] }}</span>
+            {{ dia | date: 'dd/MM' }}
+          </button>
+        }
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Hora de inicio (la misma todos los días)</legend>
+      <div class="fila hora">
+        <input type="number" placeholder="Hora" formControlName="hora" />
+        <input type="number" placeholder="Min" formControlName="minutos" />
+      </div>
+      @if (formProgramar.controls.hora.touched && formProgramar.controls.hora.invalid) {
+        <small>Hora entre 0 y 23</small>
+      } @else if (formProgramar.controls.minutos.touched && formProgramar.controls.minutos.invalid) {
+        <small>Minutos entre 0 y 59</small>
+      }
+    </fieldset>
+
+    <div class="fila">
+      <label>
+        Formato
+        <select formControlName="formato">
+          @for (formato of formatos; track formato) {
+            <option [ngValue]="formato">{{ formato }}</option>
+          }
+        </select>
+      </label>
+      <label>
+        Idioma
+        <select formControlName="idioma">
+          @for (idioma of idiomas; track idioma) {
+            <option [ngValue]="idioma">{{ idioma === 'castellano' ? 'Castellano' : 'Subtitulada' }}</option>
+          }
+        </select>
+      </label>
+    </div>
+
+    <div class="fila">
+      <label>
+        Precio
+        <input type="number" formControlName="precio" />
+        @if (formProgramar.controls.precio.touched && formProgramar.controls.precio.invalid) {
+          <small>Tiene que ser mayor a 0</small>
+        }
+      </label>
+      <label>
+        Precio VIP (filas R–T)
+        <input type="number" formControlName="precio_vip" />
+        @if (formProgramar.controls.precio_vip.touched && formProgramar.controls.precio_vip.invalid) {
+          <small>Tiene que ser mayor a 0</small>
+        }
+      </label>
+    </div>
+
+    <button type="submit" [disabled]="!formProgramar.valid || diasElegidos().length === 0 || procesando()">
+      {{ procesando() ? 'Buscando salas…' : 'Programar' }}
+    </button>
+
+    @if (mensaje()) {
+      <small>{{ mensaje() }}</small>
+    }
+  </form>
+
+  <!-- Qué pasó con cada día -->
+  @if (resultados().length > 0) {
+    <ul class="resultados">
+      @for (r of resultados(); track r.dia.getTime()) {
+        <li [class.ok]="r.sala">
+          <span>{{ r.sala ? '✓' : '✗' }} {{ nombresDias[r.dia.getDay()] }} {{ r.dia | date: 'dd/MM HH:mm' }}</span>
+          <strong>{{ r.sala ?? r.motivo }}</strong>
+        </li>
+      }
+    </ul>
+  }
+</section>
