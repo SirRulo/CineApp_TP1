@@ -24,6 +24,9 @@ export class Compra implements OnInit, OnDestroy {
   mensaje = signal('');
   // '' = puede comprar; si no, el motivo (película +13/+18 y usuario menor o sin sesión)
   restriccion = signal('');
+  // Crédito a favor (cancelaciones): solo registrados. Se usa si tilda el checkbox.
+  saldoCredito = signal(0);
+  usarCredito = signal(false);
 
   // Lo que se muestra después de pagar (el carrito ya se vació)
   codigo = signal<string | null>(null);
@@ -51,6 +54,12 @@ export class Compra implements OnInit, OnDestroy {
       const perfil = await this.auth.obtenerPerfil();
       this.restriccion.set(this.auth.restriccionDeEdad(contenido.pelicula?.edad_minima ?? 0, perfil));
       await this.verificarCupon();
+      // verificarCupon deja el usuarioId si hay sesión
+      const usuarioId = this.usuarioId();
+      if (usuarioId) {
+        const saldo = await this.comprasService.getSaldoCredito(usuarioId);
+        this.saldoCredito.set(saldo ?? 0);
+      }
     }
   }
 
@@ -125,8 +134,22 @@ export class Compra implements OnInit, OnDestroy {
     return Math.round(this.subtotalEntradas() * cupon.porcentaje) / 100;
   }
 
+  // Crédito que se usa en esta compra: nunca más que el saldo ni más de lo que hay que pagar
+  creditoAplicado() {
+    if (!this.usarCredito()) {
+      return 0;
+    }
+    return Math.min(this.saldoCredito(), this.subtotal() - this.descuento());
+  }
+
+  // Lo que se paga con el otro medio (simulado): entradas − cupón + candy − crédito
   totalAPagar() {
-    return this.subtotal() - this.descuento();
+    return this.subtotal() - this.descuento() - this.creditoAplicado();
+  }
+
+  // Checkbox "Usar mi crédito" (como los géneros de AltaPelicula: [checked] + (change))
+  alternarCredito() {
+    this.usarCredito.set(!this.usarCredito());
   }
 
   // 8 caracteres al azar: toString(36) escribe el número con dígitos y letras (0-9, a-z).
@@ -147,6 +170,7 @@ export class Compra implements OnInit, OnDestroy {
     // 1) La compra (devuelve su id)
     const codigo = this.generarCodigo();
     const total = this.totalAPagar();
+    const creditoUsado = this.creditoAplicado();
     const resultCompra = await this.comprasService.addCompra({
       codigo: codigo,
       usuario_id: this.usuarioId(),
@@ -154,7 +178,8 @@ export class Compra implements OnInit, OnDestroy {
       cupon_id: this.cupon()?.id ?? null,
       subtotal: this.subtotal(),
       descuento: this.descuento(),
-      total: total,
+      credito_usado: creditoUsado,
+      total: total,   // lo cobrado con el otro medio (el crédito va aparte)
     });
     if (resultCompra.error) {
       // Incluye el caso (muy raro) de un código repetido: con otro clic se genera uno nuevo
@@ -203,7 +228,21 @@ export class Compra implements OnInit, OnDestroy {
       return;
     }
 
-    // 4) Listo: se guarda lo comprado para la confirmación y se vacía el carrito
+    // 4) Si usó crédito, se descuenta del saldo con un movimiento 'uso' (recién ahora que la compra salió bien)
+    if (creditoUsado > 0) {
+      const resultCredito = await this.comprasService.addMovimientoCredito({
+        usuario_id: this.usuarioId()!,
+        tipo: 'uso',
+        monto: creditoUsado,
+        compra_id: compraId,
+      });
+      if (resultCredito.error) {
+        // La compra ya está hecha: solo queda registrado para revisar (no se le corta la compra al cliente)
+        console.error('No se pudo descontar el crédito:', resultCredito.error.message);
+      }
+    }
+
+    // 5) Listo: se guarda lo comprado para la confirmación y se vacía el carrito
     this.comprado.set(contenido);
     this.totalPagado.set(total);
     this.codigo.set(codigo);

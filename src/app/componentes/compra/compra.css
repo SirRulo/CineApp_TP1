@@ -128,3 +128,18 @@ em.vip {
   color: var(--warning);
   font-weight: 600;
 }
+
+/* Checkbox "Usar mi crédito" */
+.usar-credito {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0;
+  color: var(--text-main);
+  cursor: pointer;
+}
+
+.usar-credito input {
+  width: auto;
+  accent-color: var(--accent);
+}

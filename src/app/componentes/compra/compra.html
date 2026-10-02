@@ -87,8 +87,21 @@
           <span>{{ totalCandy() | currency }}</span>
         </div>
       }
+      <!-- Crédito a favor: combinable con el otro medio de pago -->
+      @if (saldoCredito() > 0) {
+        <label class="usar-credito">
+          <input type="checkbox" [checked]="usarCredito()" (change)="alternarCredito()" />
+          Usar mi crédito ({{ saldoCredito() | currency }} disponible)
+        </label>
+        @if (creditoAplicado() > 0) {
+          <div class="linea cupon">
+            <span>Crédito</span>
+            <span>− {{ creditoAplicado() | currency }}</span>
+          </div>
+        }
+      }
       <div class="linea total">
-        <span>Total</span>
+        <span>{{ creditoAplicado() > 0 ? 'Resto a pagar' : 'Total' }}</span>
         <strong>{{ totalAPagar() | currency }}</strong>
       </div>
 
