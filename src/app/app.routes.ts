@@ -67,6 +67,10 @@ export const routes: Routes = [
             {
                 path: 'funciones/nueva',
                 loadComponent: () => import('./componentes/alta-funcion/alta-funcion').then(m => m.AltaFuncion)
+            },
+            {
+                path: 'cupones',
+                loadComponent: () => import('./componentes/lista-cupones/lista-cupones').then(m => m.ListaCupones)
             }
         ]
     },

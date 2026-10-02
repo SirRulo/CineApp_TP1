@@ -4,6 +4,6 @@ export interface Cupon {
     descripcion: string | null;
     porcentaje: number;
     solo_primera_compra: boolean;
-    edad_minima: number | null;  // null = sin límite de edad (el +50 es de S3)
+    edad_minima: number | null;  // null = sin límite de edad; 50 = cupón para mayores de 50
     activo: boolean;
 }

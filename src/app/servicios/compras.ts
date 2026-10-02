@@ -2,6 +2,7 @@ import { Service } from '@angular/core';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { environment } from '../../environments/environment';
 import { Compra } from '../models/compra';
+import { Cupon } from '../models/cupon';
 import { Entrada } from '../models/entrada';
 
 @Service()
@@ -44,5 +45,15 @@ export class Compras {
     getCuponPrimeraCompra() {
         return this.supabase.from('cupones').select('*')
             .eq('solo_primera_compra', true).eq('activo', true);
+    }
+
+    // Para el panel admin: todos (activos e inactivos), ordenados por código
+    getCupones() {
+        return this.supabase.from('cupones').select('*').order('codigo');
+    }
+
+    // Igual que updatePelicula: cambia porcentaje o activo
+    updateCupon(cupon: Cupon) {
+        return this.supabase.from('cupones').update(cupon).eq('id', cupon.id);
     }
 }

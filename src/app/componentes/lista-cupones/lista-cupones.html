@@ -1,0 +1,56 @@
+<section class="lista card">
+  <h2>Cupones</h2>
+  <p class="ayuda">El porcentaje se lee de la base en cada compra: el cambio vale desde la próxima.</p>
+
+  @if (mensaje()) {
+    <small [class.ok]="exito()">{{ mensaje() }}</small>
+  }
+
+  <ul>
+    @for (cupon of cupones(); track cupon.id) {
+      <li>
+        <div class="fila">
+          <div class="datos" [class.inactivo]="!cupon.activo">
+            <strong>{{ cupon.codigo }}</strong>
+            <span>{{ cupon.descripcion }}</span>
+            <span class="etiquetas">
+              <span>{{ cupon.activo ? 'Activo' : 'Inactivo' }}</span>
+              @if (cupon.solo_primera_compra) {
+                <span>Solo primera compra</span>
+              }
+              @if (cupon.edad_minima) {
+                <span>Desde {{ cupon.edad_minima }} años</span>
+              }
+            </span>
+          </div>
+          <span class="porcentaje" [class.inactivo]="!cupon.activo">{{ cupon.porcentaje }} %</span>
+        </div>
+
+        @if (editando() === cupon.id) {
+          <form [formGroup]="formCupon" (ngSubmit)="guardar(cupon)" class="edicion">
+            <label>
+              Nuevo porcentaje
+              <input type="number" formControlName="porcentaje" min="1" max="100" />
+            </label>
+            <button type="submit" [disabled]="formCupon.invalid">Guardar</button>
+            <button type="button" class="secundario" (click)="cancelar()">Cancelar</button>
+          </form>
+          @if (formCupon.controls.porcentaje.touched && formCupon.controls.porcentaje.invalid) {
+            <small>Tiene que ser un número entre 1 y 100</small>
+          }
+        } @else {
+          <div class="acciones">
+            <button type="button" (click)="editar(cupon)">Cambiar %</button>
+            <button type="button" class="secundario" (click)="alternarActivo(cupon)">
+              {{ cupon.activo ? 'Desactivar' : 'Activar' }}
+            </button>
+          </div>
+        }
+      </li>
+    } @empty {
+      @if (!mensaje()) {
+        <p class="vacio">No hay cupones cargados.</p>
+      }
+    }
+  </ul>
+</section>

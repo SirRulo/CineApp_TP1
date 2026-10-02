@@ -1,0 +1,109 @@
+.lista {
+  padding: 1.8rem;
+  animation: riseIn 0.4s ease-out;
+}
+
+.ayuda {
+  color: var(--text-soft);
+  font-size: 0.92rem;
+}
+
+ul {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  padding: 1rem;
+  border-radius: 14px;
+  background: var(--surface-strong);
+}
+
+.fila {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.datos {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.datos span {
+  color: var(--text-soft);
+  font-size: 0.92rem;
+}
+
+.etiquetas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.etiquetas span {
+  padding: 0.1rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid rgba(167, 171, 192, 0.25);
+  font-size: 0.8rem;
+}
+
+/* El porcentaje grande, en la tipografía de títulos */
+.porcentaje {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2.4rem;
+  color: var(--gold);
+}
+
+/* Solo se apagan los datos: los botones siguen viéndose normales (igual que en funciones) */
+.inactivo {
+  opacity: 0.55;
+}
+
+.acciones,
+.edicion {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.7rem;
+}
+
+.edicion label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  color: var(--text-soft);
+  font-size: 0.9rem;
+  max-width: 10rem;
+}
+
+/* Botón de acción secundaria: borde en vez del rojo del botón principal */
+button.secundario {
+  background: transparent;
+  border: 1px solid rgba(167, 171, 192, 0.35);
+  box-shadow: none;
+  color: var(--text-main);
+}
+
+small.ok {
+  color: var(--gold);
+}
+
+.vacio {
+  color: var(--text-soft);
+}
+
+@media (max-width: 480px) {
+  .edicion {
+    flex-wrap: wrap;
+  }
+}
