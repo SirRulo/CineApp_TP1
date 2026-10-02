@@ -1,6 +1,7 @@
 import { CurrencyPipe, DatePipe } from '@angular/common';
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { RealtimeChannel } from '@supabase/supabase-js';
 import { Butaca } from '../../models/butaca';
 import { Funcion } from '../../models/funcion';
 import { Pelicula } from '../../models/pelicula';
@@ -21,7 +22,7 @@ interface Fila {
   styleUrl: './seleccion-butacas.css',
   templateUrl: './seleccion-butacas.html',
 })
-export class SeleccionButacas implements OnInit {
+export class SeleccionButacas implements OnInit, OnDestroy {
   readonly maximo = 10;
 
   funcion = signal<Funcion | null>(null);
@@ -30,6 +31,9 @@ export class SeleccionButacas implements OnInit {
   ocupadas = signal<number[]>([]);          // ids de las butacas ya vendidas
   seleccionadas = signal<Butaca[]>([]);
   mensaje = signal('');
+
+  // Canal de Supabase Realtime (butacas en tiempo real); se cierra en ngOnDestroy
+  private canal?: RealtimeChannel;
 
   constructor(
     private route: ActivatedRoute,
@@ -68,6 +72,34 @@ export class SeleccionButacas implements OnInit {
     }
     this.ocupadas.set(ocupadas.data.map(fila => fila.butaca_id));
     this.filas.set(this.armarFilas(butacas.data));
+
+    // Tiempo real: si alguien compra (o cancela) una butaca de esta función, se recargan las ocupadas
+    this.canal = this.funcionesService.escucharEntradas(id, () => this.recargarOcupadas(id));
+  }
+
+  // Al salir de la pantalla se cierra el canal (si no, seguiría escuchando para nada)
+  ngOnDestroy() {
+    if (this.canal) {
+      this.funcionesService.dejarDeEscuchar(this.canal);
+    }
+  }
+
+  // Vuelve a pedir las ocupadas. Si una butaca que el usuario tenía elegida ya no está libre,
+  // se la saca de la selección y se avisa.
+  private async recargarOcupadas(funcionId: number) {
+    const result = await this.funcionesService.getButacasOcupadas(funcionId);
+    if (result.error) {
+      return; // se queda con lo que tenía; la barrera final sigue siendo el índice único al pagar
+    }
+    const ocupadas: number[] = result.data.map(fila => fila.butaca_id);
+    this.ocupadas.set(ocupadas);
+
+    const perdidas = this.seleccionadas().filter(b => ocupadas.includes(b.id));
+    if (perdidas.length > 0) {
+      this.seleccionadas.set(this.seleccionadas().filter(b => !ocupadas.includes(b.id)));
+      const nombres = perdidas.map(b => b.fila + b.numero).join(', ');
+      this.mensaje.set(`Otra persona acaba de comprar: ${nombres}. Elegí otra.`);
+    }
   }
 
   // Las butacas vienen ordenadas por fila y número. Cada vez que cambia la letra se abre

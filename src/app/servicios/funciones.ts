@@ -1,5 +1,5 @@
 import { Service } from '@angular/core';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { createClient, RealtimeChannel, SupabaseClient } from '@supabase/supabase-js';
 import { environment } from '../../environments/environment';
 import { Funcion } from '../models/funcion';
 
@@ -51,6 +51,24 @@ export class Funciones {
     getButacasOcupadas(funcionId: number) {
         return this.supabase.from('entradas').select('butaca_id')
             .eq('funcion_id', funcionId).eq('estado', 'activa');
+    }
+
+    // Tiempo real (Supabase Realtime, viene en la misma librería): abre un canal que avisa
+    // cada vez que cambia una fila de entradas de esta función (insert = compra nueva,
+    // update = cancelación). Hace falta activar Realtime en la tabla entradas en Supabase.
+    // Devuelve el canal para poder cerrarlo después (como guardar la Subscription para el unsubscribe).
+    escucharEntradas(funcionId: number, alCambiar: () => void): RealtimeChannel {
+        return this.supabase
+            .channel('entradas-funcion-' + funcionId)
+            .on('postgres_changes',
+                { event: '*', schema: 'public', table: 'entradas', filter: 'funcion_id=eq.' + funcionId },
+                () => alCambiar())
+            .subscribe();
+    }
+
+    // Cierra el canal (se llama en ngOnDestroy, como unsubscribe)
+    dejarDeEscuchar(canal: RealtimeChannel) {
+        return this.supabase.removeChannel(canal);
     }
 
     addFuncion(funcion: Funcion) {
