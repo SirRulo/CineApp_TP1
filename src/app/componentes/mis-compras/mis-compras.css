@@ -1,0 +1,106 @@
+.mis-compras {
+  width: min(100% - 2rem, 720px);
+  margin: 2rem auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  animation: riseIn 0.4s ease-out;
+}
+
+.mis-compras h1 {
+  margin: 0;
+  line-height: 1;
+}
+
+.credito {
+  padding: 1.2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.credito span {
+  color: var(--text-soft);
+}
+
+.credito strong {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2.4rem;
+  color: var(--gold);
+  line-height: 1;
+}
+
+.credito .nota {
+  color: var(--text-soft);
+  font-weight: 400;
+}
+
+.mensaje {
+  margin: 0;
+  padding: 0.8rem 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--warning);
+  color: var(--warning);
+  font-weight: 600;
+}
+
+.mensaje.ok {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.ayuda {
+  color: var(--text-soft);
+}
+
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+li {
+  padding: 1rem 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Las canceladas se ven apagadas (solo los datos) */
+li.cancelada .datos {
+  opacity: 0.55;
+}
+
+.datos {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.datos span {
+  color: var(--text-soft);
+  font-size: 0.92rem;
+}
+
+.codigo {
+  color: var(--gold);
+  letter-spacing: 0.1em;
+}
+
+.estado {
+  color: var(--text-soft);
+  font-size: 0.85rem;
+  text-align: right;
+}
+
+@media (max-width: 480px) {
+  li {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

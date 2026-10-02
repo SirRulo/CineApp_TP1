@@ -4,6 +4,7 @@ import { environment } from '../../environments/environment';
 import { Compra } from '../models/compra';
 import { CompraProducto } from '../models/compra-producto';
 import { Cupon } from '../models/cupon';
+import { MovimientoCredito } from '../models/movimiento-credito';
 import { Entrada } from '../models/entrada';
 
 @Service()
@@ -70,6 +71,49 @@ export class Compras {
     getComprasPagadas(usuarioId: string) {
         return this.supabase.from('compras').select('id')
             .eq('usuario_id', usuarioId).eq('estado', 'pagada');
+    }
+
+    // ---------- Mis compras, cancelación y crédito (S9) ----------
+
+    // Las compras del cliente, la más nueva primero
+    getComprasDeUsuario(usuarioId: string) {
+        return this.supabase.from('compras').select('*')
+            .eq('usuario_id', usuarioId).order('created_at', { ascending: false });
+    }
+
+    // Cancela solo si sigue pagada y no se usó (ni ingreso ni candy): mismo truco que validarIngreso.
+    // Si entre que se mostró el botón y el clic alguien la validó, data vuelve vacío.
+    cancelarCompraDelCliente(compraId: number) {
+        return this.supabase.from('compras').update({ estado: 'cancelada' })
+            .eq('id', compraId).eq('estado', 'pagada')
+            .is('ingreso_validado_en', null).is('candy_entregado_en', null).select();
+    }
+
+    // Las entradas canceladas dejan de ocupar la butaca (getButacasOcupadas solo mira las activas)
+    cancelarEntradasDeCompra(compraId: number) {
+        return this.supabase.from('entradas').update({ estado: 'cancelada' }).eq('compra_id', compraId);
+    }
+
+    addMovimientoCredito(movimiento: MovimientoCredito) {
+        return this.supabase.from('movimientos_credito').insert([movimiento]);
+    }
+
+    getMovimientosCredito(usuarioId: string) {
+        return this.supabase.from('movimientos_credito').select('*')
+            .eq('usuario_id', usuarioId).order('created_at', { ascending: false });
+    }
+
+    // Saldo = cancelaciones − usos (no hay columna de saldo). null si no se pudo calcular.
+    async getSaldoCredito(usuarioId: string): Promise<number | null> {
+        const result = await this.getMovimientosCredito(usuarioId);
+        if (result.error) {
+            return null;
+        }
+        let saldo = 0;
+        for (const m of result.data) {
+            saldo += m.tipo === 'cancelacion' ? Number(m.monto) : -Number(m.monto);
+        }
+        return saldo;
     }
 
     // ---------- Reportes del admin (S6) ----------

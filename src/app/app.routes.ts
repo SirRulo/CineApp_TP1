@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './guards/auth-guard';
 import { roleGuard } from './guards/role-guard';
 
 export const routes: Routes = [
@@ -30,6 +31,12 @@ export const routes: Routes = [
     {
         path: 'compra',
         loadComponent: () => import('./componentes/compra/compra').then(m => m.Compra)
+    },
+    // Solo pide estar logueado (cualquier rol): authGuard con canActivate
+    {
+        path: 'mis-compras',
+        loadComponent: () => import('./componentes/mis-compras/mis-compras').then(m => m.MisCompras),
+        canActivate: [authGuard]
     },
     {
         path: 'registro',

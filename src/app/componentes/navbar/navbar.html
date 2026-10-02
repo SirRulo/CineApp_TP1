@@ -13,6 +13,9 @@
       @if (auth.perfil()?.rol === 'empleado') {
         <a routerLink="/empleado" routerLinkActive="active">Empleado</a>
       }
+      @if (auth.perfil()?.rol === 'cliente') {
+        <a routerLink="/mis-compras" routerLinkActive="active">Mis compras</a>
+      }
       <span class="usuario">Hola, {{ auth.perfil()?.nombre }}</span>
       <button class="salir" (click)="salir()">Salir</button>
     } @else {

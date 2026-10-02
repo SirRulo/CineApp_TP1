@@ -1,0 +1,44 @@
+<section class="mis-compras">
+  <h1>Mis compras</h1>
+
+  <!-- Saldo de crédito: suma de los movimientos -->
+  <div class="credito card">
+    <span>Crédito disponible</span>
+    <strong>{{ saldo() | currency }}</strong>
+    <small class="nota">Se usa al pagar tu próxima compra. Si cancelás una compra hasta 2 h antes, el total vuelve como crédito (no como dinero).</small>
+  </div>
+
+  @if (mensaje()) {
+    <p class="mensaje" [class.ok]="exito()">{{ mensaje() }}</p>
+  }
+
+  @if (cargando()) {
+    <p class="ayuda">Cargando…</p>
+  } @else {
+    <ul>
+      @for (v of compras(); track v.compra.id) {
+        <li class="card" [class.cancelada]="v.compra.estado === 'cancelada'">
+          <div class="datos">
+            <strong>{{ v.titulo }}</strong>
+            @if (v.funcion; as f) {
+              <span>{{ f.inicio | date: 'dd/MM HH:mm' }} · {{ f.formato }} · {{ v.entradas }} {{ v.entradas === 1 ? 'entrada' : 'entradas' }}</span>
+            }
+            <span>Código <b class="codigo">{{ v.compra.codigo }}</b> · {{ v.compra.total | currency }}</span>
+          </div>
+
+          <div class="acciones">
+            @if (motivoSinCancelar(v); as motivo) {
+              <span class="estado">{{ motivo }}</span>
+            } @else {
+              <button type="button" [disabled]="cancelando() !== null" (click)="cancelar(v)">
+                {{ cancelando() === v.compra.id ? 'Cancelando…' : 'Cancelar' }}
+              </button>
+            }
+          </div>
+        </li>
+      } @empty {
+        <p class="ayuda">Todavía no compraste entradas. <a routerLink="/home">Ver cartelera</a></p>
+      }
+    </ul>
+  }
+</section>
