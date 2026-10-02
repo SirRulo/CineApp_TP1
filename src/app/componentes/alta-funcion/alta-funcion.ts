@@ -6,6 +6,7 @@ import { Funcion } from '../../models/funcion';
 import { Pelicula } from '../../models/pelicula';
 import { Sala } from '../../models/sala';
 import { Funciones } from '../../servicios/funciones';
+import { Log } from '../../servicios/log';
 import { Peliculas } from '../../servicios/peliculas';
 import { sinSolapamientoValidator } from '../../validators/funcion.validators';
 
@@ -73,7 +74,7 @@ export class AltaFuncion implements OnInit, OnDestroy {
     validators: [sinSolapamientoValidator(this.funcionesDeSala)],
   });
 
-  constructor(private funciones: Funciones, private peliculasService: Peliculas) {
+  constructor(private funciones: Funciones, private peliculasService: Peliculas, private log: Log) {
     const hoy = new Date();
     for (let i = 0; i < 14; i++) {
       // Si el día se pasa del fin de mes (ej. 32), Date lo convierte solo al mes siguiente
@@ -160,6 +161,11 @@ export class AltaFuncion implements OnInit, OnDestroy {
       this.mensaje.set('No se pudo guardar la función: ' + result.error.message);
       return;
     }
+
+    // Log: quién creó qué función (la fecha y hora de la acción la pone la base)
+    const sala = this.salas().find(s => s.id === datos.sala_id)?.nombre ?? datos.sala_id;
+    await this.log.registrar('Crear función',
+      `"${pelicula.titulo}" · ${sala} · ${inicio.toLocaleString('es-AR')} · ${datos.formato} ${datos.idioma} · $${datos.precio} / VIP $${datos.precio_vip}`);
 
     this.exito.set(true);
     this.mensaje.set(`Función de "${pelicula.titulo}" guardada`);

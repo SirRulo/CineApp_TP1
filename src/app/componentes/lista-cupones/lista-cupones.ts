@@ -2,6 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Cupon } from '../../models/cupon';
 import { Compras } from '../../servicios/compras';
+import { Log } from '../../servicios/log';
 
 @Component({
   imports: [ReactiveFormsModule],
@@ -21,7 +22,7 @@ export class ListaCupones implements OnInit {
     porcentaje: new FormControl<number | null>(null, [Validators.required, Validators.min(1), Validators.max(100)])
   });
 
-  constructor(private comprasService: Compras) {}
+  constructor(private comprasService: Compras, private log: Log) {}
 
   ngOnInit() {
     this.cargarCupones();
@@ -55,6 +56,10 @@ export class ListaCupones implements OnInit {
       this.mensaje.set('No se pudo guardar "' + cupon.codigo + '": ' + result.error.message);
       this.exito.set(false);
       return;
+    }
+    // Log: solo si de verdad cambió el porcentaje
+    if (porcentaje !== cupon.porcentaje) {
+      await this.log.registrar('Cambiar precio', `Cupón ${cupon.codigo}: ${cupon.porcentaje} % → ${porcentaje} %`);
     }
     this.mensaje.set('Cupón ' + cupon.codigo + ' actualizado: ' + porcentaje + ' %');
     this.exito.set(true);

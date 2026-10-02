@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Categoria } from '../../models/categoria';
 import { Producto } from '../../models/producto';
 import { Candy } from '../../servicios/candy';
+import { Log } from '../../servicios/log';
 
 @Component({
   imports: [ReactiveFormsModule],
@@ -18,6 +19,8 @@ export class AltaProducto implements OnInit {
 
   // null = alta (productos/nuevo); con número = edición (productos/editar/:id), igual que AltaPelicula
   productoId = signal<number | null>(null);
+  // Precio antes de editar: para dejar en el log solo los cambios de precio reales
+  precioOriginal = signal<number | null>(null);
 
   formProducto = new FormGroup({
     nombre: new FormControl('', {
@@ -36,7 +39,7 @@ export class AltaProducto implements OnInit {
     imagen_url: new FormControl(''),
   });
 
-  constructor(private candy: Candy, private route: ActivatedRoute, private router: Router) {}
+  constructor(private candy: Candy, private log: Log, private route: ActivatedRoute, private router: Router) {}
 
   async ngOnInit() {
     const result = await this.candy.getCategorias();
@@ -61,6 +64,7 @@ export class AltaProducto implements OnInit {
       return;
     }
     const producto: Producto = result.data[0];
+    this.precioOriginal.set(producto.precio);
     this.formProducto.patchValue({
       nombre: producto.nombre,
       categoria_id: producto.categoria_id,
@@ -90,6 +94,10 @@ export class AltaProducto implements OnInit {
       if (result.error) {
         this.mensaje.set('No se pudo actualizar el producto: ' + result.error.message);
         return;
+      }
+      if (datos.precio !== this.precioOriginal()) {
+        await this.log.registrar('Cambiar precio',
+          `Producto "${datos.nombre}": $${this.precioOriginal()} → $${datos.precio}`);
       }
       this.router.navigate(['/admin/productos']);
       return;
