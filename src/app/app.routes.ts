@@ -39,63 +39,13 @@ export const routes: Routes = [
         path: 'login',
         loadComponent: () => import('./componentes/login/login').then(m => m.Login)
     },
-    // canMatch: si el rol no coincide, para ese usuario la ruta "no existe" y termina en '**'
-    // Al estar en el padre, protege también a todas las rutas hijas (children).
+    // Panel admin como módulo con carga perezosa (loadChildren), como mi-modulo de la cátedra.
+    // canMatch: si el rol no coincide, para ese usuario la ruta "no existe" y termina en '**'.
+    // Al estar acá, protege todas las rutas del módulo.
     {
         path: 'admin',
-        loadComponent: () => import('./componentes/admin/admin').then(m => m.Admin),
         canMatch: [roleGuard('admin')],
-        children: [
-            // /admin a secas muestra el listado
-            {
-                path: '',
-                redirectTo: 'peliculas',
-                pathMatch: 'full'
-            },
-            {
-                path: 'peliculas',
-                loadComponent: () => import('./componentes/lista-peliculas/lista-peliculas').then(m => m.ListaPeliculas)
-            },
-            {
-                path: 'peliculas/nueva',
-                loadComponent: () => import('./componentes/alta-pelicula/alta-pelicula').then(m => m.AltaPelicula)
-            },
-            // Mismo componente: si viene :id, trabaja en modo edición
-            {
-                path: 'peliculas/editar/:id',
-                loadComponent: () => import('./componentes/alta-pelicula/alta-pelicula').then(m => m.AltaPelicula)
-            },
-            {
-                path: 'funciones',
-                loadComponent: () => import('./componentes/lista-funciones/lista-funciones').then(m => m.ListaFunciones)
-            },
-            {
-                path: 'funciones/nueva',
-                loadComponent: () => import('./componentes/alta-funcion/alta-funcion').then(m => m.AltaFuncion)
-            },
-            // Asignación automática de sala (varios días a la vez)
-            {
-                path: 'funciones/programar',
-                loadComponent: () => import('./componentes/programar-funciones/programar-funciones').then(m => m.ProgramarFunciones)
-            },
-            {
-                path: 'productos',
-                loadComponent: () => import('./componentes/lista-productos/lista-productos').then(m => m.ListaProductos)
-            },
-            {
-                path: 'productos/nuevo',
-                loadComponent: () => import('./componentes/alta-producto/alta-producto').then(m => m.AltaProducto)
-            },
-            // Mismo componente en modo edición, como peliculas/editar/:id
-            {
-                path: 'productos/editar/:id',
-                loadComponent: () => import('./componentes/alta-producto/alta-producto').then(m => m.AltaProducto)
-            },
-            {
-                path: 'cupones',
-                loadComponent: () => import('./componentes/lista-cupones/lista-cupones').then(m => m.ListaCupones)
-            }
-        ]
+        loadChildren: () => import('./modulos/admin/admin-module').then(m => m.AdminModule)
     },
     {
         path: 'empleado',
