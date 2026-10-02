@@ -63,6 +63,34 @@ export class Auth {
         return this.cargarPerfil();
     }
 
+    // fecha 'AAAA-MM-DD' → años cumplidos hoy (antes estaba en Compra, para el cupón +50).
+    // Resta los años y, si este año todavía no llegó el cumpleaños, resta uno más.
+    calcularEdad(fechaNacimiento: string) {
+        const [anio, mes, dia] = fechaNacimiento.split('-').map(Number);
+        const hoy = new Date();
+        let edad = hoy.getFullYear() - anio;
+        const mesHoy = hoy.getMonth() + 1; // getMonth va de 0 a 11
+        if (mesHoy < mes || (mesHoy === mes && hoy.getDate() < dia)) {
+            edad--;
+        }
+        return edad;
+    }
+
+    // Restricción de edad de una película (0 = ATP, 13 o 18): '' si puede comprar, o el motivo.
+    // Sin sesión no se sabe la edad: para +13/+18 hay que ingresar (decisión de Franco, 02/10).
+    restriccionDeEdad(edadMinima: number, perfil: Perfil | null) {
+        if (edadMinima === 0) {
+            return '';
+        }
+        if (!perfil) {
+            return `Película +${edadMinima}: ingresá con tu cuenta para comprar`;
+        }
+        if (this.calcularEdad(perfil.fecha_nacimiento) < edadMinima) {
+            return `Esta película es solo para mayores de ${edadMinima} años`;
+        }
+        return '';
+    }
+
     async cerrarSesion() {
         await this.signOut();
         this.perfil.set(null);

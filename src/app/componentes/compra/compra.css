@@ -118,3 +118,13 @@ em.vip {
   text-align: center;
   align-items: center;
 }
+
+/* Aviso de película con restricción de edad en la confirmación */
+.adulto {
+  margin: 0;
+  padding: 0.6rem 0.9rem;
+  border-radius: 12px;
+  border: 1px solid var(--warning);
+  color: var(--warning);
+  font-weight: 600;
+}

@@ -17,6 +17,13 @@
             <span class="butaca">{{ e.butaca.fila }}{{ e.butaca.numero }}</span>
           }
         </p>
+        @if (c.pelicula && c.pelicula.edad_minima > 0) {
+          <!-- Lo pide el cliente: toda entrada a una película con restricción aclara que debe ir un adulto -->
+          <p class="adulto">
+            Película +{{ c.pelicula.edad_minima }}: los menores de {{ c.pelicula.edad_minima }} años deben ir con un adulto.
+            Se puede pedir DNI en la entrada.
+          </p>
+        }
         @if (c.productos.length > 0) {
           <p class="datos">
             Candy (retiralo con este mismo código):
@@ -85,8 +92,13 @@
         <strong>{{ totalAPagar() | currency }}</strong>
       </div>
 
-      <p class="aviso">Pago simulado: no se piden datos de tarjeta.</p>
-      <button type="button" [disabled]="pagando()" (click)="pagar()">
+      @if (restriccion()) {
+        <!-- Restricción de edad: no se puede pagar -->
+        <small>{{ restriccion() }}</small>
+      } @else {
+        <p class="aviso">Pago simulado: no se piden datos de tarjeta.</p>
+      }
+      <button type="button" [disabled]="pagando() || restriccion() !== ''" (click)="pagar()">
         {{ pagando() ? 'Procesando…' : 'Pagar' }}
       </button>
     </div>

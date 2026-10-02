@@ -34,6 +34,9 @@
           {{ f.inicio | date: 'dd/MM HH:mm' }} a {{ f.fin | date: 'HH:mm' }} · {{ f.formato }}
         </p>
       }
+      @if (edadMinima() > 0) {
+        <p class="aviso">Película +{{ edadMinima() }}: los menores de {{ edadMinima() }} deben ingresar con un adulto (pedir DNI).</p>
+      }
 
       <p class="datos">
         Butacas:

@@ -262,3 +262,9 @@ button.opcion.elegido span {
   color: var(--gold);
   font-weight: 600;
 }
+
+/* En lugar del botón "Elegir butacas" cuando la edad no alcanza o falta iniciar sesión */
+.restriccion {
+  color: var(--warning);
+  font-weight: 600;
+}

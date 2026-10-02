@@ -154,6 +154,16 @@ export class DetallePelicula implements OnInit, OnDestroy {
     await this.cargarResenas(pelicula.id!);
   }
 
+  // Restricción de edad (primera barrera): '' = puede comprar.
+  // Lee el signal auth.perfil() (lo carga el navbar al arrancar): cuando llega el perfil, se recalcula solo.
+  restriccion() {
+    const pelicula = this.pelicula();
+    if (!pelicula) {
+      return '';
+    }
+    return this.auth.restriccionDeEdad(pelicula.edad_minima, this.auth.perfil());
+  }
+
   // Ej.: 4 → '★★★★☆' (llenas + vacías, siempre 5)
   dibujarEstrellas(cantidad: number) {
     return '★'.repeat(cantidad) + '☆'.repeat(5 - cantidad);

@@ -37,6 +37,7 @@ export class Empleado {
   compra = signal<Compra | null>(null);
   funcion = signal<Funcion | null>(null);
   titulo = signal('');
+  edadMinima = signal(0);   // 0 = ATP; 13 o 18 = avisar que los menores van con un adulto
   sala = signal('');
   butacas = signal<Butaca[]>([]);
   candy = signal<LineaCandy[]>([]);
@@ -61,6 +62,7 @@ export class Empleado {
     this.compra.set(null);
     this.funcion.set(null);
     this.titulo.set('');
+    this.edadMinima.set(0);
     this.sala.set('');
     this.butacas.set([]);
     this.candy.set([]);
@@ -93,6 +95,7 @@ export class Empleado {
     const pelicula = await this.peliculasService.getPelicula(f.pelicula_id);
     const salas = await this.funcionesService.getSalas();
     this.titulo.set(pelicula.data?.[0]?.titulo ?? '(película)');
+    this.edadMinima.set(pelicula.data?.[0]?.edad_minima ?? 0);
     this.sala.set(salas.data?.find(s => s.id === f.sala_id)?.nombre ?? '(sala)');
 
     // Butacas: las entradas activas de la compra, buscadas en las butacas de la sala

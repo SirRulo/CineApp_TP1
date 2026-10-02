@@ -122,7 +122,17 @@
               {{ f.inicio | date: 'dd/MM HH:mm' }} · {{ salaDe(f.sala_id) }} · {{ f.formato }} ·
               desde $ {{ f.precio }}
             </span>
-            <button type="button" [routerLink]="['/funcion', f.id]">Elegir butacas</button>
+            @if (restriccion()) {
+              <!-- +13/+18: sin sesión o menor de edad no se puede seguir -->
+              <span class="restriccion">
+                {{ restriccion() }}
+                @if (!auth.perfil()) {
+                  · <a routerLink="/login">Ingresar</a>
+                }
+              </span>
+            } @else {
+              <button type="button" [routerLink]="['/funcion', f.id]">Elegir butacas</button>
+            }
           </div>
         }
       } @else if (!mensaje()) {

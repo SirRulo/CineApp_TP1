@@ -22,6 +22,8 @@ export class Compra implements OnInit, OnDestroy {
   cupon = signal<Cupon | null>(null);
   pagando = signal(false);
   mensaje = signal('');
+  // '' = puede comprar; si no, el motivo (película +13/+18 y usuario menor o sin sesión)
+  restriccion = signal('');
 
   // Lo que se muestra después de pagar (el carrito ya se vació)
   codigo = signal<string | null>(null);
@@ -43,7 +45,11 @@ export class Compra implements OnInit, OnDestroy {
       this.contenido.set(contenido);
     });
 
-    if (this.contenido()) {
+    const contenido = this.contenido();
+    if (contenido) {
+      // Segunda barrera de la edad (la primera es el detalle): por si se llega con la URL a mano
+      const perfil = await this.auth.obtenerPerfil();
+      this.restriccion.set(this.auth.restriccionDeEdad(contenido.pelicula?.edad_minima ?? 0, perfil));
       await this.verificarCupon();
     }
   }
@@ -75,7 +81,7 @@ export class Compra implements OnInit, OnDestroy {
 
     const porEdad = await this.comprasService.getCuponesPorEdad();
     if (!porEdad.error) {
-      const edad = this.calcularEdad(perfil.fecha_nacimiento);
+      const edad = this.auth.calcularEdad(perfil.fecha_nacimiento);
       for (const cupon of porEdad.data) {
         if (edad >= cupon.edad_minima) {
           candidatos.push(cupon);
@@ -91,19 +97,6 @@ export class Compra implements OnInit, OnDestroy {
       }
     }
     this.cupon.set(mejor);
-  }
-
-  // fecha 'AAAA-MM-DD' → años cumplidos hoy.
-  // Resta los años y, si este año todavía no llegó el cumpleaños, resta uno más.
-  private calcularEdad(fechaNacimiento: string) {
-    const [anio, mes, dia] = fechaNacimiento.split('-').map(Number);
-    const hoy = new Date();
-    let edad = hoy.getFullYear() - anio;
-    const mesHoy = hoy.getMonth() + 1; // getMonth va de 0 a 11
-    if (mesHoy < mes || (mesHoy === mes && hoy.getDate() < dia)) {
-      edad--;
-    }
-    return edad;
   }
 
   subtotalEntradas() {
@@ -145,7 +138,7 @@ export class Compra implements OnInit, OnDestroy {
   // Pago simulado: no se pide tarjeta; "pagar" es guardar la compra y sus entradas
   async pagar() {
     const contenido = this.contenido();
-    if (!contenido || this.pagando()) {
+    if (!contenido || this.pagando() || this.restriccion()) {
       return;
     }
     this.pagando.set(true);
