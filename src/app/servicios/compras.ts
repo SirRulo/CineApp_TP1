@@ -35,6 +35,37 @@ export class Compras {
         return this.supabase.from('compras').update({ estado: 'cancelada' }).eq('id', id);
     }
 
+    // ---------- Validación en la puerta y en el candy (S4) ----------
+
+    // El código se guarda en mayúsculas: se pasa a mayúsculas lo que tipeó el empleado
+    getCompraPorCodigo(codigo: string) {
+        return this.supabase.from('compras').select('*').eq('codigo', codigo.trim().toUpperCase());
+    }
+
+    getEntradasDeCompra(compraId: number) {
+        return this.supabase.from('entradas').select('*').eq('compra_id', compraId);
+    }
+
+    getProductosDeCompra(compraId: number) {
+        return this.supabase.from('compra_productos').select('*').eq('compra_id', compraId);
+    }
+
+    // Marca el ingreso. .is(..., null) = "solo si todavía nadie lo validó": si dos empleados
+    // validan el mismo código a la vez, el segundo no encuentra fila para actualizar.
+    // .select() devuelve las filas actualizadas: vacío = ya estaba usado.
+    validarIngreso(compraId: number, empleadoId: string) {
+        return this.supabase.from('compras')
+            .update({ ingreso_validado_en: new Date().toISOString(), ingreso_validado_por: empleadoId })
+            .eq('id', compraId).is('ingreso_validado_en', null).select();
+    }
+
+    // Lo mismo para el candy: se puede entregar una sola vez
+    entregarCandy(compraId: number, empleadoId: string) {
+        return this.supabase.from('compras')
+            .update({ candy_entregado_en: new Date().toISOString(), candy_entregado_por: empleadoId })
+            .eq('id', compraId).is('candy_entregado_en', null).select();
+    }
+
     // Solo el id: alcanza para saber si el usuario ya compró alguna vez (cupón de primera compra)
     getComprasPagadas(usuarioId: string) {
         return this.supabase.from('compras').select('id')

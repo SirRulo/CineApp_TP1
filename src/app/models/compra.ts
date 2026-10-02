@@ -10,4 +10,9 @@ export interface Compra {
     credito_usado?: number;     // lo pone la base (0) hasta S9
     estado?: 'pagada' | 'cancelada';  // lo pone la base ('pagada')
     created_at?: string;
+    // Las dos marcas del código (S4): null = todavía no se usó. Las pone el empleado al validar.
+    ingreso_validado_en?: string | null;   // fecha y hora (timestamptz)
+    ingreso_validado_por?: string | null;  // uuid del empleado
+    candy_entregado_en?: string | null;
+    candy_entregado_por?: string | null;
 }
