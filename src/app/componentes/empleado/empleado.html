@@ -1,2 +1,84 @@
-<!-- Provisorio: acá va la validación de QR (S4) -->
-<h1>Panel de empleados</h1>
+<section class="empleado">
+  <h1>Validar compra</h1>
+  <p class="ayuda">Escaneá o escribí el código que muestra el cliente.</p>
+
+  <form class="buscador card" (submit)="buscar($event)">
+    <label>
+      Código
+      <input type="text" placeholder="Ej. K3F9QZ2A" autocomplete="off" [formField]="validacionForm.codigo" />
+      @if (validacionForm.codigo().touched() && validacionForm.codigo().invalid()) {
+        <small>{{ validacionForm.codigo().errors()[0].message }}</small>
+      }
+    </label>
+    <button type="submit" [disabled]="validacionForm().invalid()">Buscar</button>
+  </form>
+
+  @if (mensaje()) {
+    <p class="mensaje" [class.ok]="exito()">{{ mensaje() }}</p>
+  }
+
+  @if (compra(); as c) {
+    <div class="resultado card" [class.cancelada]="c.estado === 'cancelada'">
+      <header>
+        <span class="codigo">{{ c.codigo }}</span>
+        @if (c.estado === 'cancelada') {
+          <span class="etiqueta alerta">Cancelada</span>
+        } @else {
+          <span class="etiqueta">Pagada</span>
+        }
+      </header>
+
+      @if (funcion(); as f) {
+        <p class="datos">
+          <strong>{{ titulo() }}</strong> · {{ sala() }} ·
+          {{ f.inicio | date: 'dd/MM HH:mm' }} a {{ f.fin | date: 'HH:mm' }} · {{ f.formato }}
+        </p>
+      }
+
+      <p class="datos">
+        Butacas:
+        @for (b of butacas(); track b.id) {
+          <span class="chip">{{ b.fila }}{{ b.numero }}</span>
+        } @empty {
+          <span>sin butacas activas</span>
+        }
+      </p>
+
+      <!-- Marca 1: ingreso a la sala -->
+      <div class="marca">
+        <h2>Ingreso</h2>
+        @if (c.ingreso_validado_en) {
+          <p class="usado">Ya ingresó el {{ c.ingreso_validado_en | date: 'dd/MM HH:mm' }}</p>
+        } @else {
+          @if (motivoSinIngreso()) {
+            <p class="aviso">{{ motivoSinIngreso() }}</p>
+          }
+          <button type="button" [disabled]="procesando() || motivoSinIngreso() !== ''" (click)="validarIngreso()">
+            Validar ingreso
+          </button>
+        }
+      </div>
+
+      <!-- Marca 2: candy (solo si la compra tiene) -->
+      @if (candy().length > 0) {
+        <div class="marca">
+          <h2>Candy</h2>
+          <ul>
+            @for (linea of candy(); track $index) {
+              <li>{{ linea.cantidad }} × {{ linea.nombre }}</li>
+            }
+          </ul>
+          @if (c.candy_entregado_en) {
+            <p class="usado">Entregado el {{ c.candy_entregado_en | date: 'dd/MM HH:mm' }}</p>
+          } @else {
+            <button type="button" [disabled]="procesando() || c.estado === 'cancelada'" (click)="entregarCandy()">
+              Entregar candy
+            </button>
+          }
+        </div>
+      }
+
+      <button type="button" class="secundario" (click)="nuevaBusqueda()">Nueva búsqueda</button>
+    </div>
+  }
+</section>
