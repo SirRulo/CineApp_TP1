@@ -1,0 +1,61 @@
+<section class="candy">
+  @if (contenido(); as c) {
+    <a [routerLink]="['/funcion', c.funcion.id]" class="volver">← Cambiar butacas</a>
+    <h1>¿Algo para la película?</h1>
+    <p class="ayuda">{{ c.pelicula?.titulo }} · {{ c.butacas.length }} {{ c.butacas.length === 1 ? 'entrada' : 'entradas' }}. Lo retirás en el candy bar con el mismo código de tu compra.</p>
+
+    @if (mensaje()) {
+      <small>{{ mensaje() }}</small>
+    }
+
+    @for (categoria of categoriasConProductos(); track categoria.id) {
+      <div class="categoria card">
+        <h2>{{ categoria.nombre }}</h2>
+        <ul>
+          @for (producto of productosDe(categoria.id); track producto.id) {
+            <li [class.elegido]="cantidadDe(producto) > 0">
+              @if (producto.imagen_url) {
+                <img [src]="producto.imagen_url" [alt]="producto.nombre" />
+              }
+              <div class="datos">
+                <strong>{{ producto.nombre }}</strong>
+                @if (producto.descripcion) {
+                  <span>{{ producto.descripcion }}</span>
+                }
+                <span class="precio">{{ producto.precio | currency }}</span>
+              </div>
+              <div class="cantidad">
+                <button type="button" [disabled]="cantidadDe(producto) === 0" (click)="restar(producto)" aria-label="Quitar uno">−</button>
+                <span>{{ cantidadDe(producto) }}</span>
+                <button type="button" [disabled]="cantidadDe(producto) >= maximoPorProducto" (click)="sumar(producto)" aria-label="Agregar uno">+</button>
+              </div>
+            </li>
+          }
+        </ul>
+      </div>
+    } @empty {
+      @if (!mensaje()) {
+        <p class="ayuda">Hoy no hay productos disponibles.</p>
+      }
+    }
+
+    <!-- Barra final: total del candy y los dos caminos -->
+    <div class="pie card">
+      <div>
+        <span class="ayuda">Candy</span>
+        <strong>{{ totalCandy() | currency }}</strong>
+      </div>
+      <div class="botones">
+        <button type="button" class="secundario" (click)="seguirSinCandy()">Seguir sin candy</button>
+        <button type="button" [disabled]="elegidos().length === 0" (click)="continuar()">Continuar</button>
+      </div>
+    </div>
+  } @else {
+    <!-- Carrito vacío (por ejemplo, se recargó la página) -->
+    <div class="vacio card">
+      <h1>No hay nada para comprar</h1>
+      <p>Elegí una película, un horario y tus butacas.</p>
+      <a routerLink="/home">Ir a la cartelera</a>
+    </div>
+  }
+</section>

@@ -17,6 +17,14 @@
             <span class="butaca">{{ e.butaca.fila }}{{ e.butaca.numero }}</span>
           }
         </p>
+        @if (c.productos.length > 0) {
+          <p class="datos">
+            Candy (retiralo con este mismo código):
+            @for (p of c.productos; track p.producto.id) {
+              <span class="butaca">{{ p.cantidad }} × {{ p.producto.nombre }}</span>
+            }
+          </p>
+        }
       }
       <p class="datos">Total pagado: <strong>{{ totalPagado() | currency }}</strong></p>
 
@@ -24,7 +32,7 @@
     </div>
   } @else if (contenido(); as c) {
     <!-- 1) Resumen y 2) pago -->
-    <a [routerLink]="['/funcion', c.funcion.id]" class="volver">← Cambiar butacas</a>
+    <a routerLink="/candy" class="volver">← Cambiar candy</a>
     <h1>Confirmá tu compra</h1>
 
     <div class="resumen card">
@@ -46,19 +54,31 @@
             <span>{{ e.precio | currency }}</span>
           </li>
         }
+        @for (p of c.productos; track p.producto.id) {
+          <li>
+            <span>{{ p.cantidad }} × {{ p.producto.nombre }}</span>
+            <span>{{ p.producto.precio * p.cantidad | currency }}</span>
+          </li>
+        }
       </ul>
 
       <div class="linea">
-        <span>Subtotal</span>
-        <span>{{ subtotal() | currency }}</span>
+        <span>Entradas</span>
+        <span>{{ subtotalEntradas() | currency }}</span>
       </div>
       @if (cupon(); as cup) {
         <div class="linea cupon">
-          <span>Cupón {{ cup.codigo }} ({{ cup.porcentaje }} %)</span>
+          <span>Cupón {{ cup.codigo }} ({{ cup.porcentaje }} %, sobre las entradas)</span>
           <span>− {{ descuento() | currency }}</span>
         </div>
       } @else if (!usuarioId()) {
         <p class="aviso">Si tenés cuenta e ingresás, tu primera compra tiene descuento.</p>
+      }
+      @if (c.productos.length > 0) {
+        <div class="linea">
+          <span>Candy</span>
+          <span>{{ totalCandy() | currency }}</span>
+        </div>
       }
       <div class="linea total">
         <span>Total</span>

@@ -137,7 +137,8 @@ export class SeleccionButacas implements OnInit {
       pelicula: this.pelicula(),
       butacas: this.seleccionadas().map(b => ({ butaca: b, precio: this.precioDe(b) })),
       total: this.total(),
+      productos: [],   // el candy se elige en la pantalla siguiente
     });
-    this.router.navigate(['/compra']);
+    this.router.navigate(['/candy']);
   }
 }

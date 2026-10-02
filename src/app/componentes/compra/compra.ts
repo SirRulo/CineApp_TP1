@@ -2,6 +2,7 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
 import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { CompraProducto } from '../../models/compra-producto';
 import { ContenidoCarrito } from '../../models/contenido-carrito';
 import { Cupon } from '../../models/cupon';
 import { Entrada } from '../../models/entrada';
@@ -105,17 +106,30 @@ export class Compra implements OnInit, OnDestroy {
     return edad;
   }
 
-  subtotal() {
+  subtotalEntradas() {
     return this.contenido()?.total ?? 0;
   }
 
-  // El porcentaje sale de la tabla cupones. Se redondea a centavos.
+  totalCandy() {
+    let total = 0;
+    for (const e of this.contenido()?.productos ?? []) {
+      total += e.producto.precio * e.cantidad;
+    }
+    return total;
+  }
+
+  // Entradas + candy (es el subtotal que se guarda en la compra)
+  subtotal() {
+    return this.subtotalEntradas() + this.totalCandy();
+  }
+
+  // El porcentaje sale de la tabla cupones y se aplica solo a las entradas. Se redondea a centavos.
   descuento() {
     const cupon = this.cupon();
     if (!cupon) {
       return 0;
     }
-    return Math.round(this.subtotal() * cupon.porcentaje) / 100;
+    return Math.round(this.subtotalEntradas() * cupon.porcentaje) / 100;
   }
 
   totalAPagar() {
@@ -157,7 +171,25 @@ export class Compra implements OnInit, OnDestroy {
     }
     const compraId = resultCompra.data[0].id;
 
-    // 2) Las entradas, todas en un solo insert
+    // 2) El candy (si eligió algo), antes que las entradas: si falla, todavía no se ocupó ninguna butaca
+    if (contenido.productos.length > 0) {
+      const filas: CompraProducto[] = contenido.productos.map(elegido => ({
+        compra_id: compraId,
+        producto_id: elegido.producto.id!,
+        combo_id: null,
+        cantidad: elegido.cantidad,
+        precio_unitario: elegido.producto.precio,
+      }));
+      const resultCandy = await this.comprasService.addProductosDeCompra(filas);
+      if (resultCandy.error) {
+        await this.comprasService.cancelarCompra(compraId);
+        this.mensaje.set('No se pudo guardar el candy: ' + resultCandy.error.message + '. Probá de nuevo.');
+        this.pagando.set(false);
+        return;
+      }
+    }
+
+    // 3) Las entradas, todas en un solo insert
     const entradas: Entrada[] = contenido.butacas.map(elegida => ({
       compra_id: compraId,
       funcion_id: contenido.funcion.id!,
@@ -178,7 +210,7 @@ export class Compra implements OnInit, OnDestroy {
       return;
     }
 
-    // 3) Listo: se guarda lo comprado para la confirmación y se vacía el carrito
+    // 4) Listo: se guarda lo comprado para la confirmación y se vacía el carrito
     this.comprado.set(contenido);
     this.totalPagado.set(total);
     this.codigo.set(codigo);

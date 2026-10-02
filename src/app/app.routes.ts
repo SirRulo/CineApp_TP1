@@ -21,6 +21,11 @@ export const routes: Routes = [
         path: 'funcion/:id',
         loadComponent: () => import('./componentes/seleccion-butacas/seleccion-butacas').then(m => m.SeleccionButacas)
     },
+    // Paso intermedio: candy bar (también sin cuenta)
+    {
+        path: 'candy',
+        loadComponent: () => import('./componentes/candy-bar/candy-bar').then(m => m.CandyBar)
+    },
     // Pago de lo que quedó en el carrito (también sin cuenta)
     {
         path: 'compra',

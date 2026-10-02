@@ -2,6 +2,7 @@ import { Service } from '@angular/core';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { environment } from '../../environments/environment';
 import { Compra } from '../models/compra';
+import { CompraProducto } from '../models/compra-producto';
 import { Cupon } from '../models/cupon';
 import { Entrada } from '../models/entrada';
 
@@ -22,6 +23,11 @@ export class Compras {
     // el índice único butaca_vendida_una_vez hace fallar este insert (y no se guarda ninguna).
     addEntradas(entradas: Entrada[]) {
         return this.supabase.from('entradas').insert(entradas);
+    }
+
+    // El candy de la compra, todo en un solo insert (como las entradas)
+    addProductosDeCompra(filas: CompraProducto[]) {
+        return this.supabase.from('compra_productos').insert(filas);
     }
 
     // Baja lógica: se usa si fallan las entradas (y en S9, para la cancelación del cliente)
