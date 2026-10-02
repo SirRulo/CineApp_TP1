@@ -1,0 +1,38 @@
+<section class="lista card">
+  <header class="encabezado">
+    <h2>Candy bar</h2>
+    <a routerLink="/admin/productos/nuevo">+ Nuevo producto</a>
+  </header>
+
+  @if (mensaje()) {
+    <small>{{ mensaje() }}</small>
+  }
+
+  <ul>
+    @for (producto of productos(); track producto.id) {
+      <li>
+        <div class="datos" [class.inactivo]="!producto.activo">
+          <strong>{{ producto.nombre }}</strong>
+          @if (producto.descripcion) {
+            <span>{{ producto.descripcion }}</span>
+          }
+          <span class="etiquetas">
+            <span>{{ categoriaDe(producto.categoria_id) }}</span>
+            <span>{{ producto.activo ? 'Activo' : 'Inactivo' }}</span>
+          </span>
+        </div>
+        <span class="precio" [class.inactivo]="!producto.activo">{{ producto.precio | currency }}</span>
+        <div class="acciones">
+          <a [routerLink]="['/admin/productos/editar', producto.id]">Editar</a>
+          <button type="button" (click)="alternarActivo(producto)">
+            {{ producto.activo ? 'Desactivar' : 'Activar' }}
+          </button>
+        </div>
+      </li>
+    } @empty {
+      @if (!mensaje()) {
+        <p class="vacio">Todavía no hay productos cargados.</p>
+      }
+    }
+  </ul>
+</section>

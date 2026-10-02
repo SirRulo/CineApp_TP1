@@ -1,0 +1,55 @@
+<section class="alta card">
+  <h2>{{ productoId() ? 'Editar producto' : 'Nuevo producto' }}</h2>
+
+  <form [formGroup]="formProducto" (ngSubmit)="guardar()">
+    <label>
+      Nombre
+      <input type="text" formControlName="nombre" />
+      @if (formProducto.controls.nombre.touched && formProducto.controls.nombre.hasError('required')) {
+        <small>El nombre es obligatorio</small>
+      }
+    </label>
+
+    <div class="fila">
+      <label>
+        Categoría
+        <!-- [ngValue] guarda el id como número -->
+        <select formControlName="categoria_id">
+          @for (categoria of categorias(); track categoria.id) {
+            <option [ngValue]="categoria.id">{{ categoria.nombre }}</option>
+          }
+        </select>
+        @if (formProducto.controls.categoria_id.touched && formProducto.controls.categoria_id.invalid) {
+          <small>Elegí una categoría</small>
+        }
+      </label>
+      <label>
+        Precio
+        <input type="number" formControlName="precio" />
+        @if (formProducto.controls.precio.touched && formProducto.controls.precio.hasError('required')) {
+          <small>El precio es obligatorio</small>
+        } @else if (formProducto.controls.precio.touched && formProducto.controls.precio.hasError('min')) {
+          <small>No puede ser negativo</small>
+        }
+      </label>
+    </div>
+
+    <label>
+      Descripción (opcional)
+      <textarea rows="3" formControlName="descripcion"></textarea>
+    </label>
+
+    <label>
+      URL de la imagen (opcional)
+      <input type="url" placeholder="https://…" formControlName="imagen_url" />
+    </label>
+
+    <button type="submit" [disabled]="!formProducto.valid">
+      {{ productoId() ? 'Guardar cambios' : 'Guardar producto' }}
+    </button>
+
+    @if (mensaje()) {
+      <small [class.ok]="exito()">{{ mensaje() }}</small>
+    }
+  </form>
+</section>

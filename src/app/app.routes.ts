@@ -69,6 +69,19 @@ export const routes: Routes = [
                 loadComponent: () => import('./componentes/alta-funcion/alta-funcion').then(m => m.AltaFuncion)
             },
             {
+                path: 'productos',
+                loadComponent: () => import('./componentes/lista-productos/lista-productos').then(m => m.ListaProductos)
+            },
+            {
+                path: 'productos/nuevo',
+                loadComponent: () => import('./componentes/alta-producto/alta-producto').then(m => m.AltaProducto)
+            },
+            // Mismo componente en modo edición, como peliculas/editar/:id
+            {
+                path: 'productos/editar/:id',
+                loadComponent: () => import('./componentes/alta-producto/alta-producto').then(m => m.AltaProducto)
+            },
+            {
                 path: 'cupones',
                 loadComponent: () => import('./componentes/lista-cupones/lista-cupones').then(m => m.ListaCupones)
             }
