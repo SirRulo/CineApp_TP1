@@ -51,7 +51,9 @@ export class Compra implements OnInit, OnDestroy {
     this.suscripcionCarrito?.unsubscribe();
   }
 
-  // Cupón de primera compra: solo para usuarios registrados que todavía no tienen compras pagadas
+  // Junta los cupones que le corresponden al usuario y aplica UNO: el de mayor porcentaje.
+  // - Primera compra: registrados sin compras pagadas.
+  // - Por edad (ej. MAYORES50): si la edad del usuario llega a edad_minima.
   private async verificarCupon() {
     const perfil = await this.auth.obtenerPerfil();
     if (!perfil) {
@@ -59,16 +61,48 @@ export class Compra implements OnInit, OnDestroy {
     }
     this.usuarioId.set(perfil.id);
 
+    const candidatos: Cupon[] = [];
+
+    // Si no se puede saber si ya compró, no se ofrece (mejor no dar un descuento que no corresponde)
     const compras = await this.comprasService.getComprasPagadas(perfil.id);
-    if (compras.error || compras.data.length > 0) {
-      return; // ya compró antes (o no se pudo saber): sin cupón
+    if (!compras.error && compras.data.length === 0) {
+      const primeraCompra = await this.comprasService.getCuponPrimeraCompra();
+      if (!primeraCompra.error && primeraCompra.data.length > 0) {
+        candidatos.push(primeraCompra.data[0]);
+      }
     }
 
-    const cupones = await this.comprasService.getCuponPrimeraCompra();
-    if (cupones.error || cupones.data.length === 0) {
-      return;
+    const porEdad = await this.comprasService.getCuponesPorEdad();
+    if (!porEdad.error) {
+      const edad = this.calcularEdad(perfil.fecha_nacimiento);
+      for (const cupon of porEdad.data) {
+        if (edad >= cupon.edad_minima) {
+          candidatos.push(cupon);
+        }
+      }
     }
-    this.cupon.set(cupones.data[0]);
+
+    // Un cupón por compra: el de mayor descuento
+    let mejor: Cupon | null = null;
+    for (const cupon of candidatos) {
+      if (!mejor || cupon.porcentaje > mejor.porcentaje) {
+        mejor = cupon;
+      }
+    }
+    this.cupon.set(mejor);
+  }
+
+  // fecha 'AAAA-MM-DD' → años cumplidos hoy.
+  // Resta los años y, si este año todavía no llegó el cumpleaños, resta uno más.
+  private calcularEdad(fechaNacimiento: string) {
+    const [anio, mes, dia] = fechaNacimiento.split('-').map(Number);
+    const hoy = new Date();
+    let edad = hoy.getFullYear() - anio;
+    const mesHoy = hoy.getMonth() + 1; // getMonth va de 0 a 11
+    if (mesHoy < mes || (mesHoy === mes && hoy.getDate() < dia)) {
+      edad--;
+    }
+    return edad;
   }
 
   subtotal() {

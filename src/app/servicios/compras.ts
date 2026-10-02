@@ -47,6 +47,13 @@ export class Compras {
             .eq('solo_primera_compra', true).eq('activo', true);
     }
 
+    // Cupones por edad (ej. MAYORES50): los activos que tienen edad_minima cargada.
+    // Si el usuario llega a esa edad lo decide la compra (la edad sale de su fecha de nacimiento).
+    getCuponesPorEdad() {
+        return this.supabase.from('cupones').select('*')
+            .eq('activo', true).not('edad_minima', 'is', null);
+    }
+
     // Para el panel admin: todos (activos e inactivos), ordenados por código
     getCupones() {
         return this.supabase.from('cupones').select('*').order('codigo');
