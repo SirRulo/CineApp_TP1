@@ -125,8 +125,9 @@ export class Compras {
     }
 
     // compra_id de cada entrada activa: para contar cuántas entradas tiene cada compra
+    // compra_id: entradas por día del reporte; funcion_id: de qué película es (gráfico de más vistas)
     getEntradasActivas() {
-        return this.supabase.from('entradas').select('compra_id').eq('estado', 'activa');
+        return this.supabase.from('entradas').select('compra_id, funcion_id').eq('estado', 'activa');
     }
 
     // Para el candy más vendido: solo productos sueltos (los combos, de S7, tienen producto_id null).

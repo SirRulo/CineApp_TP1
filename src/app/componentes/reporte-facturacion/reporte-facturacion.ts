@@ -1,8 +1,12 @@
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { Component, OnInit, signal } from '@angular/core';
+import { Funcion } from '../../models/funcion';
+import { Pelicula } from '../../models/pelicula';
 import { Producto } from '../../models/producto';
 import { Candy } from '../../servicios/candy';
 import { Compras } from '../../servicios/compras';
+import { Funciones } from '../../servicios/funciones';
+import { Peliculas } from '../../servicios/peliculas';
 
 // Lo que viene de la base para el reporte (solo las columnas pedidas)
 interface CompraReporte {
@@ -27,6 +31,19 @@ interface ProductoVendido {
   precio_unitario: number;
 }
 
+// Lo que viene de entradas (solo las columnas pedidas)
+interface EntradaReporte {
+  compra_id: number;
+  funcion_id: number;
+}
+
+// Una barra del gráfico de más vistas
+interface BarraPelicula {
+  titulo: string;
+  entradas: number;
+  porcentaje: number;   // ancho de la barra: 100 = la más vista
+}
+
 // Un puesto del ranking del candy
 interface PuestoCandy {
   nombre: string;
@@ -45,6 +62,9 @@ export class ReporteFacturacion implements OnInit {
   // Lo que se trae una sola vez; el período solo cambia cómo se filtra
   private compras: CompraReporte[] = [];
   private entradasPorCompra: { [compraId: number]: number } = {};
+  private entradas: EntradaReporte[] = [];
+  private funciones: Funcion[] = [];
+  private peliculas: Pelicula[] = [];
   private productosVendidos: ProductoVendido[] = [];
   private productos: Producto[] = [];
 
@@ -57,11 +77,17 @@ export class ReporteFacturacion implements OnInit {
   periodo = signal(7);
   filas = signal<FilaReporte[]>([]);
   topCandy = signal<PuestoCandy[]>([]);
+  masVistas = signal<BarraPelicula[]>([]);
   mensaje = signal('');
   // Fecha y hora del encabezado impreso: se fija al abrir el reporte y al tocar "Descargar PDF"
   generado = signal(new Date());
 
-  constructor(private comprasService: Compras, private candy: Candy) {}
+  constructor(
+    private comprasService: Compras,
+    private candy: Candy,
+    private funcionesService: Funciones,
+    private peliculasService: Peliculas,
+  ) {}
 
   async ngOnInit() {
     const compras = await this.comprasService.getComprasParaReporte();
@@ -71,6 +97,7 @@ export class ReporteFacturacion implements OnInit {
       return;
     }
     this.compras = compras.data;
+    this.entradas = entradas.data;
 
     // Contador como el del top 3: { compraId: cantidad de entradas }
     const contador: { [compraId: number]: number } = {};
@@ -87,6 +114,16 @@ export class ReporteFacturacion implements OnInit {
     } else {
       this.productosVendidos = vendidos.data;
       this.productos = productos.data;
+    }
+
+    // Más vistas: hace falta saber de qué película es cada función. Si falla, lo demás se muestra igual
+    const funciones = await this.funcionesService.getFunciones();
+    const peliculas = await this.peliculasService.getPeliculas();
+    if (funciones.error || peliculas.error) {
+      console.error(funciones.error ?? peliculas.error);
+    } else {
+      this.funciones = funciones.data;
+      this.peliculas = peliculas.data;
     }
 
     this.armarFilas();
@@ -135,18 +172,58 @@ export class ReporteFacturacion implements OnInit {
     // Object.values: las filas del objeto en un arreglo; lo más nuevo arriba
     const filas = Object.values(porDia).sort((a, b) => b.dia.getTime() - a.dia.getTime());
     this.filas.set(filas);
+    this.armarMasVistas(desde);
     this.armarTopCandy(desde);
   }
 
-  // Candy más vendido del período: solo productos de compras pagadas que entran en el período.
-  // this.compras ya son solo las pagadas, así que se marcan las que sirven y se cuenta como el top 3.
-  private armarTopCandy(desde: Date | null) {
-    const comprasDelPeriodo: { [compraId: number]: boolean } = {};
+  // Compras pagadas (this.compras ya son solo esas) que entran en el período: { compraId: true }.
+  // Lo usan el gráfico y el candy, así los tres bloques del reporte hablan del mismo período.
+  private comprasDelPeriodo(desde: Date | null) {
+    const marcadas: { [compraId: number]: boolean } = {};
     for (const c of this.compras) {
       if (!desde || new Date(c.created_at) >= desde) {
-        comprasDelPeriodo[c.id] = true;
+        marcadas[c.id] = true;
       }
     }
+    return marcadas;
+  }
+
+  // Gráfico de más vistas: entradas activas por película, contadas por la fecha de la COMPRA
+  // (decisión A de Franco: mismo criterio que la tabla). 7 días = la semana, 30 = el mes.
+  private armarMasVistas(desde: Date | null) {
+    const delPeriodo = this.comprasDelPeriodo(desde);
+
+    // Contador como el top 3 de Home: { peliculaId: entradas }
+    const porPelicula: { [peliculaId: number]: number } = {};
+    for (const e of this.entradas) {
+      if (!delPeriodo[e.compra_id]) {
+        continue;
+      }
+      const funcion = this.funciones.find(f => f.id === e.funcion_id);
+      if (!funcion) {
+        continue;
+      }
+      porPelicula[funcion.pelicula_id] = (porPelicula[funcion.pelicula_id] ?? 0) + 1;
+    }
+
+    // Object.keys da los ids como texto: Number() para compararlos
+    const ids = Object.keys(porPelicula).map(id => Number(id));
+    ids.sort((a, b) => porPelicula[b] - porPelicula[a]);
+    const top = ids.slice(0, 5);
+
+    // La más vista es la barra entera (100 %); las demás, en proporción a ella
+    const maximo = top.length > 0 ? porPelicula[top[0]] : 0;
+    this.masVistas.set(top.map(id => ({
+      titulo: this.peliculas.find(p => p.id === id)?.titulo ?? '(película)',
+      entradas: porPelicula[id],
+      porcentaje: Math.round(porPelicula[id] / maximo * 100),
+    })));
+  }
+
+  // Candy más vendido del período: solo productos de compras pagadas que entran en el período.
+  // Se marcan las compras que sirven y se cuenta como el top 3.
+  private armarTopCandy(desde: Date | null) {
+    const comprasDelPeriodo = this.comprasDelPeriodo(desde);
 
     // Contador por producto: { productoId: { unidades, recaudado } }
     const porProducto: { [productoId: number]: { unidades: number; recaudado: number } } = {};

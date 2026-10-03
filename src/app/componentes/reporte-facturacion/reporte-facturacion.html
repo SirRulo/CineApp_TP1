@@ -56,6 +56,28 @@
   }
 </section>
 
+<!-- Gráfico de barras sin librerías: cada barra es un div con el ancho en % -->
+<section class="vistas card">
+  <h2>Películas más vistas</h2>
+  <p class="ayuda">Mismo período de arriba (7 días = la semana, 30 = el mes). Entradas activas de compras pagadas.</p>
+
+  @if (masVistas().length > 0) {
+    <div class="grafico">
+      @for (b of masVistas(); track b.titulo; let i = $index) {
+        <div class="barra-fila" [class.primero]="i === 0">
+          <span class="titulo">{{ b.titulo }}</span>
+          <div class="pista">
+            <div class="barra" [style.width.%]="b.porcentaje"></div>
+          </div>
+          <span class="cantidad">{{ b.entradas }}</span>
+        </div>
+      }
+    </div>
+  } @else {
+    <p class="vacio">No se vendieron entradas en este período.</p>
+  }
+</section>
+
 <section class="candy card">
   <h2>Candy más vendido</h2>
   <p class="ayuda">Mismo período de arriba. Productos sueltos de compras pagadas, por unidades.</p>

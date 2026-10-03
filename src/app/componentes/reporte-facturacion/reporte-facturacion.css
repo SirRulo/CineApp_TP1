@@ -1,4 +1,5 @@
 .reporte,
+.vistas,
 .candy {
   padding: 1.8rem;
   animation: riseIn 0.4s ease-out;
@@ -74,9 +75,74 @@ tfoot td {
   color: var(--gold);
 }
 
-/* Candy más vendido: separado de la tabla de arriba */
+/* Gráfico y candy: separados del bloque de arriba */
+.vistas,
 .candy {
   margin-top: 1.5rem;
+}
+
+/* Gráfico de barras: título · pista con la barra · número */
+.grafico {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  margin-top: 0.8rem;
+}
+
+.barra-fila {
+  display: grid;
+  grid-template-columns: minmax(6rem, 12rem) 1fr 2.5rem;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.barra-fila .titulo {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* La pista es el 100 %; la barra ocupa el % que le da [style.width.%] */
+.pista {
+  height: 1.1rem;
+  border-radius: 6px;
+  background: var(--surface-strong);
+  overflow: hidden;
+}
+
+.barra {
+  height: 100%;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--accent-strong) 0%, var(--accent) 100%);
+}
+
+.barra-fila .cantidad {
+  text-align: right;
+  font-weight: 600;
+}
+
+/* La más vista en dorado */
+.barra-fila.primero .titulo,
+.barra-fila.primero .cantidad {
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.barra-fila.primero .barra {
+  background: var(--gold);
+}
+
+/* Al imprimir, el navegador no pinta fondos salvo que se le pida: así las barras salen en el PDF */
+@media print {
+  .pista,
+  .barra {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .pista {
+    border: 1px solid #cccccc;
+  }
 }
 
 .ranking {
