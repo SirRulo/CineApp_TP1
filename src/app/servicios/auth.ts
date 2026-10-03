@@ -35,6 +35,11 @@ export class Auth {
         return this.supabase.from('perfiles').select('*').eq('id', id);
     }
 
+    // Para el log del admin: solo lo necesario para mostrar quién hizo cada acción
+    getPerfiles() {
+        return this.supabase.from('perfiles').select('id, nombre, apellido, rol');
+    }
+
     crearPerfil(perfil: Perfil) {
         return this.supabase.from('perfiles').insert([perfil]);
     }

@@ -1,0 +1,44 @@
+<section class="log card">
+  <h2>Log de actividad</h2>
+  <p class="ayuda">Quién creó funciones, cambió precios o validó compras, con fecha y hora. Lo más nuevo arriba.</p>
+
+  <!-- Filtro por acción con botones, como el período del reporte -->
+  <div class="filtros">
+    @for (a of acciones; track a) {
+      <button type="button" class="filtro" [class.elegido]="accionElegida() === a" (click)="elegirAccion(a)">
+        {{ a === '' ? 'Todas' : a }}
+      </button>
+    }
+  </div>
+
+  @if (mensaje()) {
+    <small>{{ mensaje() }}</small>
+  }
+
+  @if (actividadFiltrada().length > 0) {
+    <div class="tabla">
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha y hora</th>
+            <th>Usuario</th>
+            <th>Acción</th>
+            <th>Detalle</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (a of actividadFiltrada(); track a.id) {
+            <tr>
+              <td class="fecha">{{ a.created_at | date: 'dd/MM/yyyy HH:mm' }}</td>
+              <td>{{ autorDe(a.usuario_id) }}</td>
+              <td class="accion">{{ a.accion }}</td>
+              <td class="detalle">{{ a.detalle }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  } @else if (!mensaje()) {
+    <p class="vacio">No hay actividad registrada.</p>
+  }
+</section>

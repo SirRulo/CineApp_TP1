@@ -62,6 +62,10 @@ const routes: Routes = [
             {
                 path: 'reportes',
                 loadComponent: () => import('../../componentes/reporte-facturacion/reporte-facturacion').then(m => m.ReporteFacturacion)
+            },
+            {
+                path: 'log',
+                loadComponent: () => import('../../componentes/log-actividad/log-actividad').then(m => m.LogActividad)
             }
         ]
     }
