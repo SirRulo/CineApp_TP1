@@ -51,3 +51,23 @@
     <p class="vacio">No hay ventas en este período.</p>
   }
 </section>
+
+<section class="candy card">
+  <h2>Candy más vendido</h2>
+  <p class="ayuda">Mismo período de arriba. Productos sueltos de compras pagadas, por unidades.</p>
+
+  @if (topCandy().length > 0) {
+    <ol class="ranking">
+      @for (p of topCandy(); track p.nombre; let i = $index) {
+        <li [class.primero]="i === 0">
+          <span class="puesto">{{ i + 1 }}</span>
+          <span class="nombre">{{ p.nombre }}</span>
+          <span class="unidades">{{ p.unidades }} u.</span>
+          <span class="recaudado">{{ p.recaudado | currency }}</span>
+        </li>
+      }
+    </ol>
+  } @else {
+    <p class="vacio">No se vendió candy en este período.</p>
+  }
+</section>

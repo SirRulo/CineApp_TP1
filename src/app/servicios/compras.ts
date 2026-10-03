@@ -129,6 +129,14 @@ export class Compras {
         return this.supabase.from('entradas').select('compra_id').eq('estado', 'activa');
     }
 
+    // Para el candy más vendido: solo productos sueltos (los combos, de S7, tienen producto_id null).
+    // El filtro por compra pagada y por período se hace en el reporte, con las compras que ya trajo.
+    getProductosVendidos() {
+        return this.supabase.from('compra_productos')
+            .select('compra_id, producto_id, cantidad, precio_unitario')
+            .not('producto_id', 'is', null);
+    }
+
     // Para el top 3: solo el funcion_id de cada entrada activa (una cancelada no cuenta como vendida).
     // La cuenta por película se hace en Home (group by / count no están en el material).
     getEntradasVendidas() {
