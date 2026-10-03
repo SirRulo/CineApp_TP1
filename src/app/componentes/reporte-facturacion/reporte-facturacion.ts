@@ -58,6 +58,8 @@ export class ReporteFacturacion implements OnInit {
   filas = signal<FilaReporte[]>([]);
   topCandy = signal<PuestoCandy[]>([]);
   mensaje = signal('');
+  // Fecha y hora del encabezado impreso: se fija al abrir el reporte y al tocar "Descargar PDF"
+  generado = signal(new Date());
 
   constructor(private comprasService: Compras, private candy: Candy) {}
 
@@ -93,6 +95,19 @@ export class ReporteFacturacion implements OnInit {
   elegirPeriodo(dias: number) {
     this.periodo.set(dias);
     this.armarFilas();
+  }
+
+  // PDF sin librerías: abre el diálogo de impresión del navegador y ahí se elige "Guardar como PDF".
+  // Lo que se ve en la hoja lo decide el @media print de styles.css (oculta navbar, menú y botones).
+  descargarPdf() {
+    this.generado.set(new Date());
+    // setTimeout: Angular redibuja después de este método; si imprimiera ya, la hoja saldría con la hora vieja
+    setTimeout(() => window.print());
+  }
+
+  // Para el encabezado que solo sale impreso
+  nombreDelPeriodo() {
+    return this.periodos.find(p => p.dias === this.periodo())?.nombre ?? '';
   }
 
   // Agrupa por día en TypeScript (group by no está en el material).

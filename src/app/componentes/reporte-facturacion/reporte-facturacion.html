@@ -1,14 +1,18 @@
 <section class="reporte card">
   <h2>Facturación por día</h2>
+  <!-- Solo en la hoja impresa / PDF: qué período es y cuándo se generó -->
+  <p class="solo-imprimir">{{ nombreDelPeriodo() }} · generado el {{ generado() | date: 'dd/MM/yyyy HH:mm' }}</p>
   <p class="ayuda">Solo compras pagadas (las canceladas no cuentan). Entradas = entradas activas de esas compras.</p>
 
   <!-- Período con botones (nada de calendario) -->
-  <div class="periodos">
+  <!-- no-imprimir: los botones no salen en el PDF -->
+  <div class="periodos no-imprimir">
     @for (p of periodos; track p.dias) {
       <button type="button" class="periodo" [class.elegido]="periodo() === p.dias" (click)="elegirPeriodo(p.dias)">
         {{ p.nombre }}
       </button>
     }
+    <button type="button" class="pdf" (click)="descargarPdf()" [disabled]="filas().length === 0">Descargar PDF</button>
   </div>
 
   @if (mensaje()) {

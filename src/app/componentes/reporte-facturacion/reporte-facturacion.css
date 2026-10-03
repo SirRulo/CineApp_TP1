@@ -26,6 +26,11 @@ button.periodo {
   font-weight: 500;
 }
 
+/* El de PDF va a la derecha, separado de los períodos */
+button.pdf {
+  margin-left: auto;
+}
+
 button.periodo.elegido {
   background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
   border-color: var(--gold);

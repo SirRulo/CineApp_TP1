@@ -141,3 +141,44 @@ small {
 		transform: translateY(0);
 	}
 }
+
+/* Solo existe en la hoja impresa (ej.: encabezado del reporte) */
+.solo-imprimir {
+	display: none;
+}
+
+/* Impresión / "Guardar como PDF" (reporte de facturación, S9):
+   hoja blanca, sin navbar, footer, menú del admin ni botones. Sin librerías: es CSS del navegador. */
+@media print {
+	/* Los colores salen de las variables: se redefinen para papel */
+	:root {
+		--text-main: #000000;
+		--text-soft: #444444;
+		--gold: #000000;
+	}
+
+	body {
+		background: #ffffff;
+	}
+
+	app-navbar,
+	app-footer,
+	.menu,
+	.no-imprimir {
+		display: none !important;
+	}
+
+	.solo-imprimir {
+		display: block;
+	}
+
+	/* Las cards sin fondo oscuro ni sombra, y que una card no quede cortada entre dos hojas */
+	.card {
+		background: #ffffff;
+		box-shadow: none;
+		border: 1px solid #cccccc;
+		animation: none;
+		break-inside: avoid;
+	}
+}
+
