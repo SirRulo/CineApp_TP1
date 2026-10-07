@@ -152,6 +152,18 @@ export class Compra implements OnInit, OnDestroy {
     this.usarCredito.set(!this.usarCredito());
   }
 
+  // QR de la compra: la imagen la genera api.qrserver.com con el código (sin instalar librerías).
+  // El QR guarda el mismo código que el empleado valida a mano en /empleado.
+  urlQr(codigo: string) {
+    return 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + codigo;
+  }
+
+  // PDF de la entrada: igual que el reporte, se imprime la página con los estilos @media print
+  // de styles.css (sin navbar ni botones) y el navegador ofrece "Guardar como PDF"
+  descargarPdf() {
+    window.print();
+  }
+
   // 8 caracteres al azar: toString(36) escribe el número con dígitos y letras (0-9, a-z).
   // Se sacan los "0." del principio y, si sale corto, se completa con ceros.
   private generarCodigo() {

@@ -143,3 +143,18 @@ em.vip {
   width: auto;
   accent-color: var(--accent);
 }
+
+/* El QR va sobre blanco: los lectores necesitan contraste */
+.qr {
+  background: #ffffff;
+  padding: 0.5rem;
+  border-radius: 12px;
+}
+
+.acciones-final {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}

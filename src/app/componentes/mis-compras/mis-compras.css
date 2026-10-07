@@ -104,3 +104,11 @@ li.cancelada .datos {
     align-items: stretch;
   }
 }
+
+/* QR chico de cada compra que todavía sirve */
+.qr {
+  background: #ffffff;
+  padding: 0.25rem;
+  border-radius: 8px;
+  flex-shrink: 0;
+}

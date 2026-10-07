@@ -86,6 +86,11 @@ export class MisCompras implements OnInit {
   }
 
   // '' = se puede cancelar; si no, el motivo (se muestra en lugar del botón)
+  // Mismo QR que la confirmación de la compra (api.qrserver.com arma la imagen con el código)
+  urlQr(codigo: string) {
+    return 'https://api.qrserver.com/v1/create-qr-code/?size=90x90&data=' + codigo;
+  }
+
   motivoSinCancelar(v: CompraVista) {
     const c = v.compra;
     if (c.estado === 'cancelada') {
