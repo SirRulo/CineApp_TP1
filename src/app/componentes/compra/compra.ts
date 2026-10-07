@@ -9,6 +9,7 @@ import { Entrada } from '../../models/entrada';
 import { Auth } from '../../servicios/auth';
 import { Carrito } from '../../servicios/carrito';
 import { Compras } from '../../servicios/compras';
+import { Puntos } from '../../servicios/puntos';
 
 @Component({
   imports: [CurrencyPipe, DatePipe, RouterLink],
@@ -32,6 +33,7 @@ export class Compra implements OnInit, OnDestroy {
   codigo = signal<string | null>(null);
   comprado = signal<ContenidoCarrito | null>(null);
   totalPagado = signal(0);
+  puntosSumados = signal(0);   // para la confirmación: "Sumaste N puntos"
 
   private suscripcionCarrito?: Subscription;
 
@@ -39,6 +41,7 @@ export class Compra implements OnInit, OnDestroy {
     private carrito: Carrito,
     private comprasService: Compras,
     private auth: Auth,
+    private puntosService: Puntos,
   ) {}
 
   async ngOnInit() {
@@ -254,7 +257,24 @@ export class Compra implements OnInit, OnDestroy {
       }
     }
 
-    // 5) Listo: se guarda lo comprado para la confirmación y se vacía el carrito
+    // 5) Puntos (mail 03/03): solo registrados, 1 por peso de lo cobrado (total, sin el crédito usado)
+    const puntos = this.puntosService.puntosPor(total);
+    if (this.usuarioId() && puntos > 0) {
+      const resultPuntos = await this.puntosService.addMovimiento({
+        usuario_id: this.usuarioId()!,
+        tipo: 'acumulacion',
+        puntos: puntos,
+        compra_id: compraId,
+      });
+      if (resultPuntos.error) {
+        // Igual que el crédito: la compra ya está hecha, no se corta
+        console.error('No se pudieron sumar los puntos:', resultPuntos.error.message);
+      } else {
+        this.puntosSumados.set(puntos);
+      }
+    }
+
+    // 6) Listo: se guarda lo comprado para la confirmación y se vacía el carrito
     this.comprado.set(contenido);
     this.totalPagado.set(total);
     this.codigo.set(codigo);

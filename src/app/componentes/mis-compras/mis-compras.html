@@ -8,6 +8,13 @@
     <small class="nota">Se usa al pagar tu próxima compra. Si cancelás una compra hasta 2 h antes, el total vuelve como crédito (no como dinero).</small>
   </div>
 
+  <!-- Puntos (mail 03/03): saldo = suma de los movimientos, igual que el crédito -->
+  <div class="credito card">
+    <span>Puntos acumulados</span>
+    <strong>{{ puntos() }}</strong>
+    <small class="nota">1 punto por cada peso pagado (sin contar el crédito usado). Si cancelás una compra, se descuentan sus puntos.</small>
+  </div>
+
   @if (mensaje()) {
     <p class="mensaje" [class.ok]="exito()">{{ mensaje() }}</p>
   }

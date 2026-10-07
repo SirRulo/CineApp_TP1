@@ -36,6 +36,9 @@
         }
       }
       <p class="datos">Total pagado: <strong>{{ totalPagado() | currency }}</strong></p>
+      @if (puntosSumados() > 0) {
+        <p class="datos">Sumaste <strong>{{ puntosSumados() }} puntos</strong></p>
+      }
 
       <div class="no-imprimir acciones-final">
         <button type="button" (click)="descargarPdf()">Descargar entrada (PDF)</button>
