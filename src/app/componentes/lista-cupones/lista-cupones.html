@@ -2,6 +2,42 @@
   <h2>Cupones</h2>
   <p class="ayuda">El porcentaje se lee de la base en cada compra: el cambio vale desde la próxima.</p>
 
+  <form [formGroup]="formNuevo" (ngSubmit)="crear()" class="nuevo">
+    <h3>Nuevo cupón</h3>
+    <div class="campos">
+      <label>
+        Código
+        <input type="text" formControlName="codigo" placeholder="MAYORES60" />
+      </label>
+      <label>
+        Porcentaje
+        <input type="number" formControlName="porcentaje" min="1" max="100" />
+      </label>
+      <label>
+        Edad mínima (opcional)
+        <input type="number" formControlName="edad_minima" min="1" max="120" />
+      </label>
+      <label class="ancho">
+        Descripción (opcional)
+        <input type="text" formControlName="descripcion" />
+      </label>
+      <label class="check">
+        <input type="checkbox" formControlName="solo_primera_compra" />
+        Solo primera compra
+      </label>
+    </div>
+    @if (formNuevo.controls.codigo.touched && formNuevo.controls.codigo.invalid) {
+      <small>El código es obligatorio (mínimo 3 caracteres)</small>
+    }
+    @if (formNuevo.controls.porcentaje.touched && formNuevo.controls.porcentaje.invalid) {
+      <small>El porcentaje tiene que ser un número entre 1 y 100</small>
+    }
+    @if (formNuevo.controls.edad_minima.invalid) {
+      <small>La edad tiene que estar entre 1 y 120</small>
+    }
+    <button type="submit" [disabled]="formNuevo.invalid">Crear cupón</button>
+  </form>
+
   @if (mensaje()) {
     <small [class.ok]="exito()">{{ mensaje() }}</small>
   }

@@ -24,7 +24,7 @@ export class LogActividad implements OnInit {
   private autores: Autor[] = [];
 
   // Las acciones que se registran (los mismos textos que se pasan a log.registrar). '' = todas
-  acciones = ['', 'Crear función', 'Cambiar precio', 'Validar entrada', 'Entregar candy'];
+  acciones = ['', 'Crear función', 'Cambiar precio', 'Crear cupón', 'Validar entrada', 'Entregar candy'];
   accionElegida = signal('');
   mensaje = signal('');
 

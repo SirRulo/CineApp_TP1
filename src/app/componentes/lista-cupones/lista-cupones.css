@@ -107,3 +107,47 @@ small.ok {
     flex-wrap: wrap;
   }
 }
+
+/* Alta de cupón */
+.nuevo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 14px;
+  background: var(--surface-strong);
+}
+
+.nuevo h3 {
+  margin: 0;
+}
+
+.campos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.7rem;
+}
+
+.campos label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  color: var(--text-soft);
+  font-size: 0.9rem;
+}
+
+.campos label.ancho {
+  flex: 1;
+  min-width: 12rem;
+}
+
+.campos label.check {
+  flex-direction: row;
+  align-items: center;
+}
+
+.nuevo button {
+  align-self: flex-start;
+}
