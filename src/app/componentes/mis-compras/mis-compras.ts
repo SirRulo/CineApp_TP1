@@ -8,6 +8,7 @@ import { Auth } from '../../servicios/auth';
 import { Compras } from '../../servicios/compras';
 import { Funciones } from '../../servicios/funciones';
 import { Peliculas } from '../../servicios/peliculas';
+import { Puntos } from '../../servicios/puntos';
 
 // Una compra con lo necesario para mostrarla
 interface CompraVista {
@@ -30,6 +31,7 @@ export class MisCompras implements OnInit {
 
   compras = signal<CompraVista[]>([]);
   saldo = signal(0);
+  puntos = signal(0);   // saldo de puntos (suma de movimientos)
   cargando = signal(true);
   cancelando = signal<number | null>(null);   // id de la compra que se está cancelando
   mensaje = signal('');
@@ -42,6 +44,7 @@ export class MisCompras implements OnInit {
     private comprasService: Compras,
     private funcionesService: Funciones,
     private peliculasService: Peliculas,
+    private puntosService: Puntos,
   ) {}
 
   async ngOnInit() {
@@ -82,6 +85,8 @@ export class MisCompras implements OnInit {
 
     const saldo = await this.comprasService.getSaldoCredito(this.usuarioId);
     this.saldo.set(saldo ?? 0);
+    const puntos = await this.puntosService.getSaldo(this.usuarioId);
+    this.puntos.set(puntos ?? 0);
     this.cargando.set(false);
   }
 
@@ -142,6 +147,19 @@ export class MisCompras implements OnInit {
       monto: this.creditoDe(c),
       compra_id: c.id!,
     });
+    // 4) Puntos (mail 03/03): se descuentan los que sumó esta compra (reverso)
+    const puntos = await this.puntosService.getPuntosDeCompra(this.usuarioId, c.id!);
+    if (puntos > 0) {
+      const reverso = await this.puntosService.addMovimiento({
+        usuario_id: this.usuarioId,
+        tipo: 'reverso',
+        puntos: puntos,
+        compra_id: c.id!,
+      });
+      if (reverso.error) {
+        console.error('No se pudieron descontar los puntos:', reverso.error.message);
+      }
+    }
     this.cancelando.set(null);
 
     if (entradas.error || credito.error) {
