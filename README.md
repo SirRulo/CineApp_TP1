@@ -161,7 +161,7 @@ Tablas en uso: `perfiles`, `peliculas`, `generos`, `pelicula_generos` (N:M), `sa
 | Reportes | Facturación por día (7 días / 30 días / todo, en hora local), películas más vistas (barras) y candy más vendido. Se exporta a **PDF** y a **Excel (CSV)** |
 | Reseñas | Solo usuarios registrados; una por película; comentario opcional de hasta 200 caracteres |
 | Top 3 | Películas activas con más entradas vendidas (entradas activas) |
-| Cartelera | Todas las películas activas; primero las destacadas |
+| Cartelera | Las películas activas **ya estrenadas**; primero las destacadas. Las de estreno futuro van a **"Próximamente"** (con la fecha y el estado de la preventa) |
 | UX | Sin selectores de fecha con calendario: días y horarios como botones; fechas lejanas en tres campos numéricos (día / mes / año). Compra por pasos: detalle → butacas → candy → pago |
 
 ### 3.3 Hosting
@@ -191,12 +191,12 @@ Se usa **Vercel** en lugar de Firebase Hosting (misma idea: sirve el build está
 
 ## 4. Alcance
 
-**Implementado:** registro y login con roles · panel de administración (películas, funciones con la regla de 30 minutos, asignación automática de sala, candy bar, alta y edición de cupones, reportes con gráfico, PDF y Excel, log de actividad) · cartelera con buscador y top 3 · detalle con reseñas y promedio · restricción de edad · mapa de butacas en tiempo real · candy bar en la compra · cupones de primera compra y +50 · puntos (acumulación y reverso) · preventa · entrada con QR y descarga en PDF · cancelación con crédito y uso del crédito · panel de empleados con validación por código · PWA y deploy.
+**Implementado:** registro y login con roles · panel de administración (películas, funciones con la regla de 30 minutos, asignación automática de sala, candy bar, alta y edición de cupones, reportes con gráfico, PDF y Excel, log de actividad) · cartelera con buscador y top 3 · detalle con reseñas y promedio · restricción de edad · mapa de butacas en tiempo real · candy bar en la compra · cupones de primera compra y +50 · puntos (acumulación y reverso) · Próximamente y preventa · entrada con QR y descarga en PDF · cancelación con crédito y uso del crédito · panel de empleados con validación por código · PWA y deploy.
 
 **No implementado** (por tiempo; las tablas ya están creadas en la base):
 - **Canje de puntos y recompensas** (mail 03/03): los puntos se acumulan y se ven, pero no se canjean. Tabla `recompensas` creada ("Entrada gratis", 500 pts).
 - **Combos** (mail 03/03): tablas `combos` y `combo_productos`; `compra_productos` ya admite `combo_id`.
-- **"Próximamente", alertas de estreno y "Mis películas"** (mail 08/03). La preventa sí está.
+- **Alertas de estreno y "Mis películas"** (mail 08/03). "Próximamente" y la preventa sí están.
 - **Admin de salas y distribución de butacas** (mail 06/02): las salas y sus 518 butacas se cargan con el script SQL; la distribución es fija según los mails.
 - **Lector de QR con cámara**: la validación se hace con el **código escrito a mano**, que el mail permite como alternativa.
 - **Notificaciones push.**

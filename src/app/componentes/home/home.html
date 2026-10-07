@@ -12,6 +12,20 @@
     </div>
   }
 
+  <!-- Próximamente (mail 08/03): películas activas que todavía no se estrenaron -->
+  @if (proximamente().length > 0) {
+    <h1>Próximamente</h1>
+    <div class="grilla">
+      @for (pelicula of proximamente(); track pelicula.id) {
+        <div class="proxima">
+          <app-tarjeta-pelicula [pelicula]="pelicula" />
+          <span class="estreno">Estrena {{ pelicula.fecha_estreno | date: 'dd/MM' }}</span>
+          <span class="estado">{{ estadoEstreno(pelicula) }}</span>
+        </div>
+      }
+    </div>
+  }
+
   <h1>En cartelera</h1>
 
   @if (mensaje()) {

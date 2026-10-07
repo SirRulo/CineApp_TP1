@@ -108,7 +108,7 @@ Las tablas `recompensas`, `combos` y `combo_productos` están creadas; falta la 
 | Requerimiento | Estado | Dónde |
 |---|---|---|
 | Preventa desde 7 días antes del estreno con precio especial por película | ✅ | `precio_preventa` en la película; se aplica en el mapa de butacas |
-| Sección "Próximamente" | ❌ | (el detalle sí muestra "Estrena DD/MM" y bloquea la venta) |
+| Sección "Próximamente" | ✅ | en `Home`, arriba de la cartelera, con fecha de estreno y estado de la preventa |
 | Alerta cuando se habilita la venta | ❌ | |
 | "Mis películas" | ❌ | |
 

@@ -99,3 +99,21 @@ button.limpiar {
     gap: 0.8rem;
   }
 }
+
+/* Próximamente: fecha de estreno y estado de la venta debajo de la tarjeta */
+.proxima {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.proxima .estreno {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.3rem;
+  color: var(--gold);
+}
+
+.proxima .estado {
+  color: var(--text-soft);
+  font-size: 0.85rem;
+}
