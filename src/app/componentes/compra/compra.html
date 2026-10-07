@@ -3,7 +3,9 @@
     <!-- 3) Confirmación -->
     <div class="confirmacion card">
       <h1>¡Compra lista!</h1>
-      <p>Mostrá este código en la entrada del cine:</p>
+      <p>Mostrá este QR (o el código) en la entrada del cine:</p>
+      <!-- La imagen del QR la arma un servicio externo a partir del código de la compra -->
+      <img class="qr" [src]="urlQr(cod)" alt="QR de la compra {{ cod }}" width="200" height="200" />
       <div class="codigo">{{ cod }}</div>
 
       @if (comprado(); as c) {
@@ -35,7 +37,10 @@
       }
       <p class="datos">Total pagado: <strong>{{ totalPagado() | currency }}</strong></p>
 
-      <a routerLink="/home">Volver a la cartelera</a>
+      <div class="no-imprimir acciones-final">
+        <button type="button" (click)="descargarPdf()">Descargar entrada (PDF)</button>
+        <a routerLink="/home">Volver a la cartelera</a>
+      </div>
     </div>
   } @else if (contenido(); as c) {
     <!-- 1) Resumen y 2) pago -->

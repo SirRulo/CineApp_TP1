@@ -18,6 +18,10 @@
     <ul>
       @for (v of compras(); track v.compra.id) {
         <li class="card" [class.cancelada]="v.compra.estado === 'cancelada'">
+          <!-- QR solo si la compra todavía sirve para entrar (pagada y sin validar) -->
+          @if (v.compra.estado === 'pagada' && !v.compra.ingreso_validado_en) {
+            <img class="qr" [src]="urlQr(v.compra.codigo)" alt="QR de {{ v.compra.codigo }}" width="90" height="90" />
+          }
           <div class="datos">
             <strong>{{ v.titulo }}</strong>
             @if (v.funcion; as f) {
