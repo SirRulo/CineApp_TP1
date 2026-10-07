@@ -166,4 +166,10 @@ export class Compras {
     updateCupon(cupon: Cupon) {
         return this.supabase.from('cupones').update(cupon).eq('id', cupon.id);
     }
+
+    // Alta de cupón (mail 30/01: "quiero poder crear cupones"). Sin id ni activo: los pone la base.
+    // codigo es unique: si se repite, la base devuelve el error 23505
+    addCupon(cupon: Omit<Cupon, 'id' | 'activo'>) {
+        return this.supabase.from('cupones').insert([cupon]);
+    }
 }
