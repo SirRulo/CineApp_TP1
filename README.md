@@ -157,7 +157,7 @@ Tablas en uso: `perfiles`, `peliculas`, `generos`, `pelicula_generos` (N:M), `sa
 | Cancelación | Desde "Mis compras", hasta **2 h antes** y si no se usó. Se cancelan la compra y sus entradas (las butacas se liberan) y se acredita `total + credito_usado` como **crédito**, no reembolso |
 | Crédito | Se puede usar en otra compra junto con el pago simulado; se usa solo lo necesario |
 | Log de actividad | Se registra quién creó funciones, cambió precios (cupones y candy), validó entradas y entregó candy, con fecha y hora. El admin lo ve filtrado por acción |
-| Reportes | Facturación por día (7 días / 30 días / todo, en hora local), películas más vistas (barras) y candy más vendido. Se exporta a **PDF** |
+| Reportes | Facturación por día (7 días / 30 días / todo, en hora local), películas más vistas (barras) y candy más vendido. Se exporta a **PDF** y a **Excel (CSV)** |
 | Reseñas | Solo usuarios registrados; una por película; comentario opcional de hasta 200 caracteres |
 | Top 3 | Películas activas con más entradas vendidas (entradas activas) |
 | Cartelera | Todas las películas activas; primero las destacadas |
@@ -175,6 +175,7 @@ Se usa **Vercel** en lugar de Firebase Hosting (misma idea: sirve el build está
 | Exportar el reporte | **PDF con `window.print()`** y estilos `@media print` en `styles.css` (hoja blanca, sin navbar ni menú). Sin librerías |
 | QR de la entrada | Imagen generada por **api.qrserver.com** a partir del código (`<img [src]>`), sin instalar librerías. Necesita internet; si no carga, el código en texto sirve igual |
 | PDF de la entrada | **`window.print()`**, el mismo mecanismo del reporte |
+| Exportar a Excel | **CSV** armado en TypeScript (`;` y coma decimal para Excel en español) y descargado con `Blob` + `<a download>`. Sin librerías |
 | Gráfico de más vistas | Barras hechas con `div` y `[style.width.%]`. Sin librerías |
 
 ### 3.5 Limitaciones conocidas
@@ -189,14 +190,13 @@ Se usa **Vercel** en lugar de Firebase Hosting (misma idea: sirve el build está
 
 ## 4. Alcance
 
-**Implementado:** registro y login con roles · panel de administración (películas, funciones con la regla de 30 minutos, asignación automática de sala, candy bar, alta y edición de cupones, reportes con gráfico y PDF, log de actividad) · cartelera con buscador y top 3 · detalle con reseñas y promedio · restricción de edad · mapa de butacas en tiempo real · candy bar en la compra · cupones de primera compra y +50 · preventa · entrada con QR y descarga en PDF · cancelación con crédito y uso del crédito · panel de empleados con validación por código · PWA y deploy.
+**Implementado:** registro y login con roles · panel de administración (películas, funciones con la regla de 30 minutos, asignación automática de sala, candy bar, alta y edición de cupones, reportes con gráfico, PDF y Excel, log de actividad) · cartelera con buscador y top 3 · detalle con reseñas y promedio · restricción de edad · mapa de butacas en tiempo real · candy bar en la compra · cupones de primera compra y +50 · preventa · entrada con QR y descarga en PDF · cancelación con crédito y uso del crédito · panel de empleados con validación por código · PWA y deploy.
 
 **No implementado** (por tiempo; las tablas ya están creadas en la base):
 - **Puntos** (mail 03/03): acumulación 1 punto por peso, canje, recompensas configurables y "Mi cuenta". Tablas `movimientos_puntos` y `recompensas`.
 - **Combos** (mail 03/03): tablas `combos` y `combo_productos`; `compra_productos` ya admite `combo_id`.
 - **"Próximamente", alertas de estreno y "Mis películas"** (mail 08/03). La preventa sí está.
 - **Admin de salas y distribución de butacas** (mail 06/02): las salas y sus 518 butacas se cargan con el script SQL; la distribución es fija según los mails.
-- **Exportar a Excel/CSV** (mail 10/03): el reporte se exporta solo a PDF.
 - **Lector de QR con cámara**: la validación se hace con el **código escrito a mano**, que el mail permite como alternativa.
 - **Notificaciones push.**
 

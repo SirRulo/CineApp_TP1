@@ -119,7 +119,7 @@ Las tablas (`movimientos_puntos`, `recompensas`, `combos`, `combo_productos`) es
 | Devolución como crédito, combinable con otro medio de pago | ✅ | saldo en Mis compras; checkbox al pagar |
 | Butacas VIP (filas R, S, T) más caras y marcadas en el mapa | ✅ | `precio_vip` por función |
 | Exportar el reporte a PDF | ✅ | `window.print()` |
-| Exportar el reporte a Excel | ❌ | |
+| Exportar el reporte a Excel | ✅ | CSV que abre Excel (sin librerías) |
 | Gráfico de películas más vistas por semana y por mes | ✅ | barras, 7 / 30 días |
 | Producto del candy más vendido | ✅ | top 5 del período |
 | Log: quién creó funciones, cambió precios, validó QR, con fecha y hora | ✅ | admin › Actividad |
