@@ -1,4 +1,4 @@
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
 import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -15,7 +15,7 @@ import { Peliculas } from '../../servicios/peliculas';
 import { Resenas } from '../../servicios/resenas';
 
 @Component({
-  imports: [DatePipe, DecimalPipe, RouterLink, PromedioPipe, ReactiveFormsModule, AdminDirective],
+  imports: [CurrencyPipe, DatePipe, DecimalPipe, RouterLink, PromedioPipe, ReactiveFormsModule, AdminDirective],
   selector: 'app-detalle-pelicula',
   styleUrl: './detalle-pelicula.css',
   templateUrl: './detalle-pelicula.html',
@@ -156,6 +156,19 @@ export class DetallePelicula implements OnInit, OnDestroy {
 
   // Restricción de edad (primera barrera): '' = puede comprar.
   // Lee el signal auth.perfil() (lo carga el navbar al arrancar): cuando llega el perfil, se recalcula solo.
+  // Preventa: el HTML usa estos tres para las etiquetas y para mostrar o no "Elegir butacas"
+  ventaAbierta(p: Pelicula) {
+    return this.peliculasService.ventaAbierta(p);
+  }
+
+  enPreventa(p: Pelicula) {
+    return this.peliculasService.enPreventa(p);
+  }
+
+  aperturaVenta(p: Pelicula) {
+    return this.peliculasService.aperturaVenta(p);
+  }
+
   restriccion() {
     const pelicula = this.pelicula();
     if (!pelicula) {

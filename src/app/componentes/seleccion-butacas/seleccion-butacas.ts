@@ -57,12 +57,18 @@ export class SeleccionButacas implements OnInit, OnDestroy {
       this.mensaje.set('Esta función ya empezó');
       return;
     }
-    this.funcion.set(funcion);
 
     const pelicula = await this.peliculasService.getPelicula(funcion.pelicula_id);
     if (!pelicula.error && pelicula.data.length > 0) {
       this.pelicula.set(pelicula.data[0]);
+      // Preventa: antes de que abra la venta no se puede comprar (aunque la función ya exista)
+      if (!this.peliculasService.ventaAbierta(pelicula.data[0])) {
+        const apertura = this.peliculasService.aperturaVenta(pelicula.data[0]);
+        this.mensaje.set('La venta de esta película abre el ' + apertura.toLocaleDateString('es-AR'));
+        return;
+      }
     }
+    this.funcion.set(funcion);
 
     const butacas = await this.funcionesService.getButacasDeSala(funcion.sala_id);
     const ocupadas = await this.funcionesService.getButacasOcupadas(id);
@@ -140,11 +146,16 @@ export class SeleccionButacas implements OnInit, OnDestroy {
     }
   }
 
-  // El precio lo fija la función: las VIP (filas R, S, T) usan precio_vip, el resto precio
+  // El precio lo fija la función: las VIP (filas R, S, T) usan precio_vip, el resto precio.
+  // En preventa todas las entradas (también las VIP) cuestan el precio de preventa de la película
   precioDe(b: Butaca) {
     const funcion = this.funcion();
     if (!funcion) {
       return 0;
+    }
+    const pelicula = this.pelicula();
+    if (pelicula && this.peliculasService.enPreventa(pelicula)) {
+      return Number(pelicula.precio_preventa);  // numeric puede llegar como texto (como en el reporte)
     }
     return b.tipo === 'vip' ? funcion.precio_vip : funcion.precio;
   }

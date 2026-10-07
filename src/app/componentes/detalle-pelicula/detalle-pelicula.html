@@ -9,6 +9,11 @@
         <div class="etiquetas">
           <span>{{ p.edad_minima === 0 ? 'ATP' : '+' + p.edad_minima }}</span>
           <span>{{ p.duracion_min }} min</span>
+          @if (enPreventa(p)) {
+            <span class="preventa">Preventa {{ p.precio_preventa | currency }} · estrena {{ p.fecha_estreno | date: 'dd/MM' }}</span>
+          } @else if (!ventaAbierta(p)) {
+            <span class="preventa">Estrena {{ p.fecha_estreno | date: 'dd/MM' }}</span>
+          }
           @for (genero of generos(); track genero) {
             <span>{{ genero }}</span>
           }
@@ -122,7 +127,10 @@
               {{ f.inicio | date: 'dd/MM HH:mm' }} · {{ salaDe(f.sala_id) }} · {{ f.formato }} ·
               desde $ {{ f.precio }}
             </span>
-            @if (restriccion()) {
+            @if (pelicula() && !ventaAbierta(pelicula()!)) {
+              <!-- Todavía no abrió la venta (preventa o estreno) -->
+              <span class="restriccion">La venta abre el {{ aperturaVenta(pelicula()!) | date: 'dd/MM' }}</span>
+            } @else if (restriccion()) {
               <!-- +13/+18: sin sesión o menor de edad no se puede seguir -->
               <span class="restriccion">
                 {{ restriccion() }}
