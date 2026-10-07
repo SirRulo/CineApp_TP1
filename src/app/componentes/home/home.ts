@@ -1,3 +1,4 @@
+import { DatePipe } from '@angular/common';
 import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Genero } from '../../models/genero';
@@ -9,7 +10,7 @@ import { Peliculas } from '../../servicios/peliculas';
 import { TarjetaPelicula } from '../tarjeta-pelicula/tarjeta-pelicula';
 
 @Component({
-  imports: [TarjetaPelicula, FormsModule, FiltroPipe],
+  imports: [TarjetaPelicula, FormsModule, FiltroPipe, DatePipe],
   selector: 'app-home',
   styleUrl: './home.css',
   templateUrl: './home.html',
@@ -17,6 +18,7 @@ import { TarjetaPelicula } from '../tarjeta-pelicula/tarjeta-pelicula';
 export class Home implements OnInit {
   peliculas = signal<Pelicula[]>([]);
   top3 = signal<Pelicula[]>([]);
+  proximamente = signal<Pelicula[]>([]);   // mail 08/03: las que todavía no se estrenaron
   mensaje = signal('');
 
   // Buscador (como pipes/app.ts del profe: signal + [(ngModel)])
@@ -37,10 +39,27 @@ export class Home implements OnInit {
       this.mensaje.set('No se pudo cargar la cartelera: ' + result.error.message);
       return;
     }
-    this.peliculas.set(result.data);
+    // Se separan por fecha de estreno: las que ya se estrenaron van a la cartelera (y al top 3 y al buscador),
+    // las que no, a "Próximamente" (ordenadas por estreno, la más cercana primero)
+    const hoy = new Date();
+    this.peliculas.set(result.data.filter(p => this.peliculasService.fechaEstreno(p) <= hoy));
+    this.proximamente.set(result.data
+      .filter(p => this.peliculasService.fechaEstreno(p) > hoy)
+      .sort((a, b) => this.peliculasService.fechaEstreno(a).getTime() - this.peliculasService.fechaEstreno(b).getTime()));
 
     await this.cargarTop3();
     await this.cargarGeneros();
+  }
+
+  // Etiqueta de cada película de "Próximamente" (usa las reglas de preventa del servicio)
+  estadoEstreno(p: Pelicula) {
+    if (this.peliculasService.enPreventa(p)) {
+      return 'Preventa abierta';
+    }
+    if (p.precio_preventa !== null) {
+      return 'Preventa desde el ' + this.peliculasService.aperturaVenta(p).toLocaleDateString('es-AR');
+    }
+    return 'Venta desde el estreno';
   }
 
   // Géneros para los botones + qué géneros tiene cada película (para el pipe filtro)
