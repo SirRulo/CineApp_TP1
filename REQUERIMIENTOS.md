@@ -94,13 +94,14 @@ Referencias: ✅ implementado · ⚠️ implementado con una interpretación o a
 
 | Requerimiento | Estado |
 |---|---|
-| 1 punto por peso gastado (registrados) | ❌ |
+| 1 punto por peso gastado (registrados) | ✅ al pagar (sobre lo cobrado, sin el crédito); se revierte al cancelar |
 | Canje de puntos por entradas o candy | ❌ |
 | Admin configura los puntos de cada recompensa | ❌ |
-| Perfil con puntos e historial de canjes | ❌ |
+| Perfil con puntos e historial de canjes | ⚠️ saldo de puntos en "Mis compras"; sin canjes |
+| Los puntos no se transfieren | ✅ solo los suma o resta el sistema, siempre del mismo usuario |
 | Combos a precio fijo, destacados en la compra | ❌ |
 
-Las tablas (`movimientos_puntos`, `recompensas`, `combos`, `combo_productos`) están creadas; falta la parte de Angular.
+Las tablas `recompensas`, `combos` y `combo_productos` están creadas; falta la parte de Angular.
 
 ## Mail 08/03 · Próximamente, preventa y Mis películas
 
@@ -142,4 +143,5 @@ Puntos que los mails no definen y cómo se resolvieron:
 | Butacas por compra | Máximo 10 |
 | Pago | Simulado (sin datos de tarjeta) |
 | QR | Imagen generada por un servicio externo con el código de la compra; el empleado lo valida escribiendo el código |
+| Puntos | 1 por peso de lo cobrado con el medio de pago (`total`). Lo pagado con crédito no suma: esa plata ya había sumado puntos en la compra cancelada |
 | Borrado | Baja lógica (`activa` / `estado`); no se borran datos |
