@@ -13,6 +13,7 @@
       </button>
     }
     <button type="button" class="pdf" (click)="descargarPdf()" [disabled]="filas().length === 0">Descargar PDF</button>
+    <button type="button" (click)="descargarExcel()" [disabled]="filas().length === 0">Descargar Excel</button>
   </div>
 
   @if (mensaje()) {

@@ -142,6 +142,25 @@ export class ReporteFacturacion implements OnInit {
     setTimeout(() => window.print());
   }
 
+  // Excel sin librerías (mail 10/03): se arma un CSV (texto con una fila por línea) y se descarga.
+  // Separador ";" y decimales con "," porque así lo abre Excel en español; '﻿' (BOM) para que lea bien los acentos.
+  descargarExcel() {
+    const lineas = ['Día;Compras;Entradas vendidas;Facturación'];
+    for (const f of this.filas()) {
+      lineas.push(`${f.dia.toLocaleDateString('es-AR')};${f.compras};${f.entradas};${String(f.facturacion).replace('.', ',')}`);
+    }
+    lineas.push(`Total;${this.totalCompras()};${this.totalEntradas()};${String(this.totalFacturacion()).replace('.', ',')}`);
+
+    // Blob = el archivo en memoria; un <a download> temporal hace que el navegador lo baje
+    const archivo = new Blob(['﻿' + lineas.join('\n')], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(archivo);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'reporte-facturacion.csv';
+    link.click();
+    URL.revokeObjectURL(url);  // se libera la memoria del Blob
+  }
+
   // Para el encabezado que solo sale impreso
   nombreDelPeriodo() {
     return this.periodos.find(p => p.dias === this.periodo())?.nombre ?? '';
