@@ -3,10 +3,11 @@
 Trabajo Práctico 1 · Programación IV · UTN FRA · 2.º cuatrimestre 2026
 Alumno: Franco Barbizan
 
-Aplicación web para un cine: cartelera, compra de entradas con selección de butacas en tiempo real, candy bar, cupones, reseñas, cancelación con crédito, panel de administración (películas, funciones, candy, cupones, reportes y actividad) y panel de empleados (validación de compras por código).
+Aplicación web para un cine: cartelera, compra de entradas con selección de butacas en tiempo real, candy bar, cupones, preventa, reseñas, entrada con QR y PDF, cancelación con crédito, panel de administración (películas, funciones, candy, cupones, reportes y actividad) y panel de empleados (validación de compras por código).
 
 - **App desplegada:** https://cine-app-flax.vercel.app
 - **Repositorio:** https://github.com/SirRulo/CineApp_TP1
+- **Documento de requerimientos:** [REQUERIMIENTOS.md](REQUERIMIENTOS.md)
 
 ---
 
@@ -147,8 +148,10 @@ Tablas en uso: `perfiles`, `peliculas`, `generos`, `pelicula_generos` (N:M), `sa
 | Butacas | Máximo **10 por compra**. Las VIP usan `precio_vip`. El mapa se actualiza solo cuando otra persona compra o cancela |
 | Doble venta | Las entradas se guardan en **un solo `insert`**. Si otra persona compró una butaca, el índice único rechaza el insert (error `23505`), la compra queda `cancelada` y se avisa al usuario |
 | Código de compra | 8 caracteres al azar generados en Angular, `unique` en la base. **Un código por compra**, sirve para la entrada y para el candy |
-| Cupones | Un cupón por compra, automático: **el de mayor porcentaje** entre primera compra (registrados sin compras) y +50 años. El admin cambia el % y los activa o desactiva. Se aplica **solo sobre las entradas** |
+| Cupones | Un cupón por compra, automático: **el de mayor porcentaje** entre primera compra (registrados sin compras) y +50 años. El admin **crea** cupones (código, %, edad mínima opcional, solo primera compra), cambia el % y los activa o desactiva. Se aplica **solo sobre las entradas** |
 | Candy bar | Paso opcional entre las butacas y el pago, solo junto con entradas. Precio guardado al momento de la venta (`precio_unitario`) |
+| Preventa | Si la película tiene `precio_preventa`, la venta abre **7 días antes del estreno** y hasta el estreno **todas** las entradas (también VIP) cuestan ese precio. Sin preventa, la venta abre el día del estreno. Se controla en el detalle y en el mapa de butacas |
+| Entrada | Al pagar se muestra el **QR** con el código de la compra y se puede **descargar en PDF**. El QR también aparece en "Mis compras" mientras la compra sirve |
 | Pago | **Simulado** (botón "Pagar", sin datos de tarjeta) |
 | Validación | El empleado busca por código (sin importar mayúsculas o espacios). **Ingreso**: desde 1 h antes del inicio hasta el fin de la función. **Candy**: en cualquier momento. Cada marca se usa una sola vez (`update ... where ... is null`) |
 | Cancelación | Desde "Mis compras", hasta **2 h antes** y si no se usó. Se cancelan la compra y sus entradas (las butacas se liberan) y se acredita `total + credito_usado` como **crédito**, no reembolso |
@@ -170,6 +173,8 @@ Se usa **Vercel** en lugar de Firebase Hosting (misma idea: sirve el build está
 |---|---|
 | Butacas en tiempo real | **Supabase Realtime**, que ya viene en `@supabase/supabase-js` (no se instaló nada). El mapa escucha los cambios en `entradas` de su función y vuelve a pedir las ocupadas |
 | Exportar el reporte | **PDF con `window.print()`** y estilos `@media print` en `styles.css` (hoja blanca, sin navbar ni menú). Sin librerías |
+| QR de la entrada | Imagen generada por **api.qrserver.com** a partir del código (`<img [src]>`), sin instalar librerías. Necesita internet; si no carga, el código en texto sirve igual |
+| PDF de la entrada | **`window.print()`**, el mismo mecanismo del reporte |
 | Gráfico de más vistas | Barras hechas con `div` y `[style.width.%]`. Sin librerías |
 
 ### 3.5 Limitaciones conocidas
@@ -184,14 +189,16 @@ Se usa **Vercel** en lugar de Firebase Hosting (misma idea: sirve el build está
 
 ## 4. Alcance
 
-**Implementado:** registro y login con roles · panel de administración (películas, funciones con la regla de 30 minutos, asignación automática de sala, candy bar, cupones, reportes con gráfico y PDF, log de actividad) · cartelera con buscador y top 3 · detalle con reseñas y promedio · restricción de edad · mapa de butacas en tiempo real · candy bar en la compra · cupones de primera compra y +50 · cancelación con crédito y uso del crédito · panel de empleados con validación por código · PWA y deploy.
+**Implementado:** registro y login con roles · panel de administración (películas, funciones con la regla de 30 minutos, asignación automática de sala, candy bar, alta y edición de cupones, reportes con gráfico y PDF, log de actividad) · cartelera con buscador y top 3 · detalle con reseñas y promedio · restricción de edad · mapa de butacas en tiempo real · candy bar en la compra · cupones de primera compra y +50 · preventa · entrada con QR y descarga en PDF · cancelación con crédito y uso del crédito · panel de empleados con validación por código · PWA y deploy.
 
-**En desarrollo:** puntos (acumulación, canje y recompensas), "Mi cuenta", combos, "Próximamente", preventa, alertas de estreno y "Mis películas".
-
-**No implementado:**
-- **Exportar a Excel/CSV** (el reporte se exporta solo a PDF).
-- **QR y PDF de la entrada** y **lector de QR con cámara**: pendientes de confirmar con la cátedra. La validación se hace con el **código escrito a mano**.
-- **Notificaciones push**: las alertas de estreno serán avisos dentro de la app.
+**No implementado** (por tiempo; las tablas ya están creadas en la base):
+- **Puntos** (mail 03/03): acumulación 1 punto por peso, canje, recompensas configurables y "Mi cuenta". Tablas `movimientos_puntos` y `recompensas`.
+- **Combos** (mail 03/03): tablas `combos` y `combo_productos`; `compra_productos` ya admite `combo_id`.
+- **"Próximamente", alertas de estreno y "Mis películas"** (mail 08/03). La preventa sí está.
+- **Admin de salas y distribución de butacas** (mail 06/02): las salas y sus 518 butacas se cargan con el script SQL; la distribución es fija según los mails.
+- **Exportar a Excel/CSV** (mail 10/03): el reporte se exporta solo a PDF.
+- **Lector de QR con cámara**: la validación se hace con el **código escrito a mano**, que el mail permite como alternativa.
+- **Notificaciones push.**
 
 **Fuera de alcance:** el **mapa del cine** (el cliente no dio luz verde).
 
