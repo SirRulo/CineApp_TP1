@@ -268,3 +268,9 @@ button.opcion.elegido span {
   color: var(--warning);
   font-weight: 600;
 }
+
+/* Etiqueta de preventa / próximo estreno en dorado */
+.etiquetas span.preventa {
+  color: var(--gold);
+  border-color: var(--gold);
+}
