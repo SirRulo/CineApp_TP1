@@ -46,38 +46,59 @@
       </div>
     </div>
 
-    <!-- Resumen: butacas elegidas, precio de cada una y total -->
-    <div class="resumen card">
-      <h2>Tu selección <span>({{ seleccionadas().length }} de {{ maximo }})</span></h2>
+    @if (agotada()) {
+      <!-- Lista de espera (mail RPP): solo registrados -->
+      <div class="espera card">
+        <h2>Función agotada</h2>
+        @if (miEspera()) {
+          <p>Estás en la lista de espera: <strong>puesto {{ miPosicion() }} de {{ espera().length }}</strong>.</p>
+          <p class="nota">Si se libera una butaca te avisamos y tenés 15 minutos para comprarla.</p>
+          <button type="button" class="secundario" (click)="salirDeLaLista()">Salir de la lista</button>
+        } @else if (auth.perfil()) {
+          <p>No quedan butacas libres. Anotate y te avisamos si alguien cancela: vas a tener 15 minutos para comprar.</p>
+          <p class="nota">Hay {{ espera().length }} persona(s) esperando.</p>
+          <button type="button" [disabled]="anotando()" (click)="anotarme()">Anotarme en la lista de espera</button>
+        } @else {
+          <p>No quedan butacas libres. <a routerLink="/login">Ingresá</a> para anotarte en la lista de espera.</p>
+        }
+        @if (mensajeEspera()) {
+          <small>{{ mensajeEspera() }}</small>
+        }
+      </div>
+    } @else {
+      <!-- Resumen: butacas elegidas, precio de cada una y total -->
+      <div class="resumen card">
+        <h2>Tu selección <span>({{ seleccionadas().length }} de {{ maximo }})</span></h2>
 
-      @if (seleccionadas().length > 0) {
-        <ul>
-          @for (b of seleccionadas(); track b.id) {
-            <li>
-              <span>
-                Fila {{ b.fila }} · Butaca {{ b.numero }}
-                @if (b.tipo === 'vip') {
-                  <em class="vip">VIP</em>
-                }
-                @if (b.tipo === 'accesible') {
-                  <em class="accesible">Accesible</em>
-                }
-              </span>
-              <span>{{ precioDe(b) | currency }}</span>
-            </li>
-          }
-        </ul>
+        @if (seleccionadas().length > 0) {
+          <ul>
+            @for (b of seleccionadas(); track b.id) {
+              <li>
+                <span>
+                  Fila {{ b.fila }} · Butaca {{ b.numero }}
+                  @if (b.tipo === 'vip') {
+                    <em class="vip">VIP</em>
+                  }
+                  @if (b.tipo === 'accesible') {
+                    <em class="accesible">Accesible</em>
+                  }
+                </span>
+                <span>{{ precioDe(b) | currency }}</span>
+              </li>
+            }
+          </ul>
 
-        <div class="total">
-          <span>Total</span>
-          <strong>{{ total() | currency }}</strong>
-        </div>
-      } @else {
-        <p class="vacio">Tocá una butaca libre del mapa para elegirla.</p>
-      }
+          <div class="total">
+            <span>Total</span>
+            <strong>{{ total() | currency }}</strong>
+          </div>
+        } @else {
+          <p class="vacio">Tocá una butaca libre del mapa para elegirla.</p>
+        }
 
-      <button type="button" [disabled]="seleccionadas().length === 0" (click)="continuar()">Continuar</button>
-    </div>
+        <button type="button" [disabled]="seleccionadas().length === 0" (click)="continuar()">Continuar</button>
+      </div>
+    }
   }
 
   @if (mensaje()) {

@@ -3,10 +3,13 @@ import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { RealtimeChannel } from '@supabase/supabase-js';
 import { Butaca } from '../../models/butaca';
+import { Espera } from '../../models/espera';
 import { Funcion } from '../../models/funcion';
 import { Pelicula } from '../../models/pelicula';
+import { Auth } from '../../servicios/auth';
 import { Carrito } from '../../servicios/carrito';
 import { Funciones } from '../../servicios/funciones';
+import { ListaEspera } from '../../servicios/lista-espera';
 import { Peliculas } from '../../servicios/peliculas';
 import { Asiento } from '../asiento/asiento';
 
@@ -32,6 +35,12 @@ export class SeleccionButacas implements OnInit, OnDestroy {
   seleccionadas = signal<Butaca[]>([]);
   mensaje = signal('');
 
+  // Lista de espera (mail RPP): cuántas butacas tiene la sala y quiénes esperan, en orden
+  totalButacas = signal(0);
+  espera = signal<Espera[]>([]);
+  mensajeEspera = signal('');
+  anotando = signal(false);
+
   // Canal de Supabase Realtime (butacas en tiempo real); se cierra en ngOnDestroy
   private canal?: RealtimeChannel;
 
@@ -41,6 +50,8 @@ export class SeleccionButacas implements OnInit, OnDestroy {
     private funcionesService: Funciones,
     private peliculasService: Peliculas,
     private carrito: Carrito,
+    private listaEspera: ListaEspera,
+    public auth: Auth,   // public: el HTML pregunta si hay sesión para la lista de espera
   ) {}
 
   // snapshot alcanza: para cambiar de función se vuelve al detalle y el componente se recrea
@@ -78,6 +89,8 @@ export class SeleccionButacas implements OnInit, OnDestroy {
     }
     this.ocupadas.set(ocupadas.data.map(fila => fila.butaca_id));
     this.filas.set(this.armarFilas(butacas.data));
+    this.totalButacas.set(butacas.data.length);
+    await this.cargarEspera(id);
 
     // Tiempo real: si alguien compra (o cancela) una butaca de esta función, se recargan las ocupadas
     this.canal = this.funcionesService.escucharEntradas(id, () => this.recargarOcupadas(id));
@@ -106,6 +119,67 @@ export class SeleccionButacas implements OnInit, OnDestroy {
       const nombres = perdidas.map(b => b.fila + b.numero).join(', ');
       this.mensaje.set(`Otra persona acaba de comprar: ${nombres}. Elegí otra.`);
     }
+  }
+
+  // ---------- Lista de espera (mail RPP) ----------
+
+  private async cargarEspera(funcionId: number) {
+    const result = await this.listaEspera.getEsperaDeFuncion(funcionId);
+    if (result.error) {
+      console.error(result.error);   // el mapa se muestra igual
+      return;
+    }
+    this.espera.set(result.data);
+  }
+
+  // Agotada = todas las butacas de la sala están vendidas
+  agotada() {
+    return this.totalButacas() > 0 && this.ocupadas().length >= this.totalButacas();
+  }
+
+  // Mi lugar en la fila (null = no estoy anotado)
+  miEspera() {
+    const perfil = this.auth.perfil();
+    if (!perfil) {
+      return null;
+    }
+    return this.espera().find(e => e.usuario_id === perfil.id) ?? null;
+  }
+
+  // Posición = cuántos se anotaron antes + 1 (la lista viene ordenada por created_at)
+  miPosicion() {
+    const mia = this.miEspera();
+    return mia ? this.espera().indexOf(mia) + 1 : 0;
+  }
+
+  async anotarme() {
+    const perfil = this.auth.perfil();
+    const funcion = this.funcion();
+    if (!perfil || !funcion) {
+      return;
+    }
+    this.anotando.set(true);
+    const result = await this.listaEspera.anotarse(funcion.id!, perfil.id);
+    this.anotando.set(false);
+    if (result.error) {
+      // Segunda barrera: índice una_vez_en_la_lista
+      this.mensajeEspera.set(result.error.code === '23505'
+        ? 'Ya estabas anotado en esta lista'
+        : 'No se pudo anotarte: ' + result.error.message);
+    } else {
+      this.mensajeEspera.set('¡Listo! Te avisamos si se libera una butaca');
+    }
+    await this.cargarEspera(funcion.id!);
+  }
+
+  async salirDeLaLista() {
+    const mia = this.miEspera();
+    if (!mia || !confirm('¿Salir de la lista de espera? Perdés tu lugar.')) {
+      return;
+    }
+    const result = await this.listaEspera.salir(mia.id!);
+    this.mensajeEspera.set(result.error ? 'No se pudo salir: ' + result.error.message : 'Saliste de la lista de espera');
+    await this.cargarEspera(this.funcion()!.id!);
   }
 
   // Las butacas vienen ordenadas por fila y número. Cada vez que cambia la letra se abre

@@ -184,3 +184,40 @@
 .resumen button {
   align-self: flex-end;
 }
+
+/* Lista de espera: misma tarjeta que el resumen */
+.espera {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.espera h2 {
+  margin: 0;
+  color: var(--accent);
+}
+
+.espera p {
+  margin: 0;
+}
+
+.espera strong {
+  color: var(--gold);
+}
+
+.espera .nota {
+  color: var(--text-soft);
+  font-size: 0.92rem;
+}
+
+.espera button {
+  align-self: flex-start;
+}
+
+/* Salir de la lista: borde, sin rojo (como en cupones) */
+button.secundario {
+  background: transparent;
+  border: 1px solid rgba(167, 171, 192, 0.35);
+  color: var(--text-main);
+}
