@@ -78,3 +78,9 @@ small.ok {
     flex-direction: column;
   }
 }
+
+/* Aviso cuando el alta viene de una propuesta de un cliente */
+.propuesta {
+  color: var(--gold);
+  margin-top: 0;
+}

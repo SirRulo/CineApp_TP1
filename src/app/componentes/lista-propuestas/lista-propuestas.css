@@ -1,0 +1,87 @@
+/* Mismo estilo que los otros listados del admin */
+.lista {
+  padding: 1.8rem;
+  animation: riseIn 0.4s ease-out;
+}
+
+.ayuda,
+.vacio {
+  color: var(--text-soft);
+}
+
+h3 {
+  margin: 1.4rem 0 0;
+}
+
+ul {
+  list-style: none;
+  margin: 0.8rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+li {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 0.8rem 1rem;
+  border-radius: 14px;
+  background: var(--surface-strong);
+}
+
+li.respondida {
+  align-items: center;
+}
+
+.datos {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.datos p {
+  margin: 0.3rem 0 0;
+  overflow-wrap: anywhere;
+}
+
+.autor {
+  color: var(--text-soft);
+  font-size: 0.92rem;
+}
+
+.acciones {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Rechazar: borde, sin rojo (como en cupones) */
+button.secundario {
+  background: transparent;
+  border: 1px solid rgba(167, 171, 192, 0.35);
+  color: var(--text-main);
+}
+
+.estado {
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.estado.aceptada {
+  color: var(--gold);
+}
+
+@media (max-width: 480px) {
+  li {
+    flex-wrap: wrap;
+  }
+
+  .acciones {
+    width: 100%;
+    flex-direction: row;
+  }
+}

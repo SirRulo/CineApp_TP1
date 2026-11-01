@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Genero } from '../../models/genero';
 import { Pelicula } from '../../models/pelicula';
 import { Peliculas } from '../../servicios/peliculas';
+import { PropuestaAceptada } from '../../servicios/propuesta-aceptada';
 
 @Component({
   imports: [ReactiveFormsModule],
@@ -25,6 +26,9 @@ export class AltaPelicula implements OnInit {
 
   // null = alta (peliculas/nueva); con número = edición (peliculas/editar/:id)
   peliculaId = signal<number | null>(null);
+
+  // Título de la propuesta de un cliente que se está cargando ('' = alta normal)
+  desdePropuesta = signal('');
 
   // Un FormControl por campo, cada uno con sus validadores (como form-usuarios)
   formPelicula = new FormGroup({
@@ -59,7 +63,12 @@ export class AltaPelicula implements OnInit {
     destacada: new FormControl(false),
   });
 
-  constructor(private peliculas: Peliculas, private route: ActivatedRoute, private router: Router) {}
+  constructor(
+    private peliculas: Peliculas,
+    private propuestaAceptada: PropuestaAceptada,
+    private route: ActivatedRoute,
+    private router: Router,
+  ) {}
 
   async ngOnInit() {
     const result = await this.peliculas.getGeneros();
@@ -75,6 +84,19 @@ export class AltaPelicula implements OnInit {
     if (id) {
       this.peliculaId.set(Number(id));
       await this.cargarPelicula(Number(id));
+      return;
+    }
+
+    // Alta: si se llegó aceptando una propuesta, se cargan sus datos.
+    // .value = el último valor guardado (alcanza leerlo una vez, sin subscribe)
+    const propuesta = this.propuestaAceptada.propuesta.value;
+    if (propuesta) {
+      this.desdePropuesta.set(propuesta.titulo);
+      this.formPelicula.patchValue({
+        titulo: propuesta.titulo,
+        sinopsis: propuesta.descripcion,
+      });
+      this.propuestaAceptada.vaciar();
     }
   }
 

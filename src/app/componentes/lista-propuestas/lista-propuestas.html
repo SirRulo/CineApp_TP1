@@ -1,0 +1,45 @@
+<section class="lista card">
+  <h2>Propuestas de películas</h2>
+  <p class="ayuda">Películas que piden los clientes. Al aceptar una, se abre el alta de película con el título y la descripción.</p>
+
+  @if (mensaje()) {
+    <small>{{ mensaje() }}</small>
+  }
+
+  <h3>Pendientes ({{ pendientes().length }})</h3>
+  <ul>
+    @for (p of pendientes(); track p.id) {
+      <li>
+        <div class="datos">
+          <strong>{{ p.titulo }}</strong>
+          <span class="autor">{{ autorDe(p.usuario_id) }} · {{ p.created_at | date: 'dd/MM/yyyy' }}</span>
+          <p><b>De qué se trata:</b> {{ p.descripcion }}</p>
+          <p><b>Por qué la quiere:</b> {{ p.motivo }}</p>
+        </div>
+        <div class="acciones">
+          <button type="button" (click)="aceptar(p)" [disabled]="respondiendo() === p.id">Aceptar</button>
+          <button type="button" class="secundario" (click)="rechazar(p)" [disabled]="respondiendo() === p.id">Rechazar</button>
+        </div>
+      </li>
+    } @empty {
+      <p class="vacio">No hay propuestas esperando respuesta.</p>
+    }
+  </ul>
+
+  @if (respondidas().length > 0) {
+    <h3>Respondidas</h3>
+    <ul>
+      @for (p of respondidas(); track p.id) {
+        <li class="respondida">
+          <div class="datos">
+            <strong>{{ p.titulo }}</strong>
+            <span class="autor">{{ autorDe(p.usuario_id) }} · {{ p.created_at | date: 'dd/MM/yyyy' }}</span>
+          </div>
+          <span class="estado" [class.aceptada]="p.estado === 'aceptada'">
+            {{ p.estado === 'aceptada' ? 'Aceptada' : 'Rechazada' }}
+          </span>
+        </li>
+      }
+    </ul>
+  }
+</section>

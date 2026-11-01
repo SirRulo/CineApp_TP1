@@ -1,5 +1,8 @@
 <section class="alta card">
   <h2>{{ peliculaId() ? 'Editar película' : 'Nueva película' }}</h2>
+  @if (desdePropuesta()) {
+    <p class="propuesta">Propuesta de un cliente aceptada: completá los datos que faltan de "{{ desdePropuesta() }}".</p>
+  }
 
   <form [formGroup]="formPelicula" (ngSubmit)="guardar()">
     <label>

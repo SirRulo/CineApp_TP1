@@ -63,6 +63,11 @@ const routes: Routes = [
                 path: 'reportes',
                 loadComponent: () => import('../../componentes/reporte-facturacion/reporte-facturacion').then(m => m.ReporteFacturacion)
             },
+            // Propuestas de películas de los clientes (mail RPP)
+            {
+                path: 'propuestas',
+                loadComponent: () => import('../../componentes/lista-propuestas/lista-propuestas').then(m => m.ListaPropuestas)
+            },
             {
                 path: 'log',
                 loadComponent: () => import('../../componentes/log-actividad/log-actividad').then(m => m.LogActividad)
