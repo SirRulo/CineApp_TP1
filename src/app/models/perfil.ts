@@ -8,4 +8,5 @@ export interface Perfil {
     color_ojos: string;
     dias_vacaciones: number;
     rol?: 'cliente' | 'empleado' | 'admin';
+    rol_id?: number | null;   // rol configurable (mail RPP): suma secciones del admin. null = ninguno
 }
