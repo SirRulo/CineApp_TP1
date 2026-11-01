@@ -9,6 +9,7 @@ import { Entrada } from '../../models/entrada';
 import { Auth } from '../../servicios/auth';
 import { Carrito } from '../../servicios/carrito';
 import { Compras } from '../../servicios/compras';
+import { ListaEspera } from '../../servicios/lista-espera';
 import { Puntos } from '../../servicios/puntos';
 
 @Component({
@@ -42,6 +43,7 @@ export class Compra implements OnInit, OnDestroy {
     private comprasService: Compras,
     private auth: Auth,
     private puntosService: Puntos,
+    private listaEspera: ListaEspera,
   ) {}
 
   async ngOnInit() {
@@ -174,6 +176,15 @@ export class Compra implements OnInit, OnDestroy {
   }
 
   // Pago simulado: no se pide tarjeta; "pagar" es guardar la compra y sus entradas
+  // Para los avisos de la lista de espera (como en SeleccionButacas)
+  private descripcion() {
+    const contenido = this.contenido();
+    if (!contenido) {
+      return '';
+    }
+    return `"${contenido.pelicula?.titulo ?? ''}" del ${new Date(contenido.funcion.inicio).toLocaleString('es-AR')}`;
+  }
+
   async pagar() {
     const contenido = this.contenido();
     if (!contenido || this.pagando() || this.restriccion()) {
@@ -181,6 +192,20 @@ export class Compra implements OnInit, OnDestroy {
     }
     this.pagando.set(true);
     this.mensaje.set('');
+
+    // 0) Lista de espera (mail RPP): ninguna butaca puede estar guardada para otra persona
+    //    que tiene su turno de 15 min. Se controla antes de crear nada.
+    const butacaIds = contenido.butacas.map(elegida => elegida.butaca.id);
+    const reservadas = await this.listaEspera.reservadasParaOtros(
+      contenido.funcion.id!, this.usuarioId(), butacaIds, this.descripcion());
+    if (reservadas.length > 0) {
+      const nombres = contenido.butacas
+        .filter(elegida => reservadas.includes(elegida.butaca.id))
+        .map(elegida => elegida.butaca.fila + elegida.butaca.numero).join(', ');
+      this.mensaje.set(`La butaca ${nombres} está guardada para alguien de la lista de espera. Volvé a elegir.`);
+      this.pagando.set(false);
+      return;
+    }
 
     // 1) La compra (devuelve su id)
     const codigo = this.generarCodigo();
@@ -274,7 +299,13 @@ export class Compra implements OnInit, OnDestroy {
       }
     }
 
-    // 6) Listo: se guarda lo comprado para la confirmación y se vacía el carrito
+    // 6) Lista de espera: si el comprador estaba anotado en esta función, sale como 'compro'
+    //    (y si no compró la butaca que le guardaban, esa pasa al siguiente)
+    if (this.usuarioId()) {
+      await this.listaEspera.marcarCompra(contenido.funcion.id!, this.usuarioId()!, butacaIds, this.descripcion());
+    }
+
+    // 7) Listo: se guarda lo comprado para la confirmación y se vacía el carrito
     this.comprado.set(contenido);
     this.totalPagado.set(total);
     this.codigo.set(codigo);

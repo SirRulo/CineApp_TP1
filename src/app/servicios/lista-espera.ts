@@ -84,6 +84,44 @@ export class ListaEspera {
         }
     }
 
+    // Barrera al pagar: de las butacas que se quieren comprar, cuáles están guardadas para OTRO
+    // avisado con el turno vigente. Antes vence los turnos pasados (así no frena por una reserva vieja).
+    // [] = se puede comprar todo
+    async reservadasParaOtros(funcionId: number, usuarioId: string | null, butacaIds: number[], descripcion: string) {
+        await this.vencerTurnos(funcionId, descripcion);
+        const result = await this.supabase.from('lista_espera').select('*')
+            .eq('funcion_id', funcionId).eq('estado', 'avisado');
+        if (result.error) {
+            console.error(result.error);
+            return [];   // no se pudo controlar: la última barrera sigue siendo el índice único
+        }
+        return (result.data as Espera[])
+            .filter(e => this.turnoVigente(e) && e.usuario_id !== usuarioId && butacaIds.includes(e.butaca_id!))
+            .map(e => e.butaca_id!);
+    }
+
+    // Después de pagar: si el comprador estaba en la fila de esa función, sale como 'compro'.
+    // Si lo habían avisado y no compró la butaca que le guardamos, esa pasa al siguiente.
+    async marcarCompra(funcionId: number, usuarioId: string, butacasCompradas: number[], descripcion: string) {
+        const result = await this.supabase.from('lista_espera').select('*')
+            .eq('funcion_id', funcionId).eq('usuario_id', usuarioId).in('estado', ['esperando', 'avisado']);
+        if (result.error) {
+            console.error(result.error);
+            return;
+        }
+        for (const espera of result.data as Espera[]) {
+            const marcada = await this.supabase.from('lista_espera').update({ estado: 'compro' })
+                .eq('id', espera.id).eq('estado', espera.estado!).select();
+            if (marcada.error || marcada.data.length === 0) {
+                continue;
+            }
+            const guardada = espera.estado === 'avisado' ? espera.butaca_id : null;
+            if (guardada && !butacasCompradas.includes(guardada) && await this.butacaLibre(funcionId, guardada)) {
+                await this.avisarAlPrimero(funcionId, guardada, descripcion);
+            }
+        }
+    }
+
     // ¿Nadie tiene una entrada activa para esa butaca en esa función?
     private async butacaLibre(funcionId: number, butacaId: number) {
         const result = await this.supabase.from('entradas').select('id')
