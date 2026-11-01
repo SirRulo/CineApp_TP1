@@ -6,7 +6,7 @@
     <a routerLink="/home" routerLinkActive="active">Home</a>
 
     <!-- auth.perfil() es un signal: cuando cambia (login/logout), esta parte se vuelve a dibujar -->
-    @if (auth.perfil()) {
+    @if (auth.perfil(); as perfil) {
       @if (auth.perfil()?.rol === 'admin') {
         <a routerLink="/admin" routerLinkActive="active">Admin</a>
       }
@@ -17,6 +17,8 @@
         <a routerLink="/mis-compras" routerLinkActive="active">Mis compras</a>
         <a routerLink="/propuestas" routerLinkActive="active">Proponer película</a>
       }
+      <!-- Se crea al loguearse y se destruye al salir: así abre y cierra su canal de Realtime -->
+      <app-campanita [usuarioId]="perfil.id" />
       <span class="usuario">Hola, {{ auth.perfil()?.nombre }}</span>
       <button class="salir" (click)="salir()">Salir</button>
     } @else {

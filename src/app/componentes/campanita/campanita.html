@@ -1,0 +1,29 @@
+<button type="button" class="campana" (click)="alternar()" [attr.aria-label]="'Notificaciones: ' + sinLeer() + ' sin leer'">
+  🔔
+  @if (sinLeer() > 0) {
+    <span class="contador">{{ sinLeer() }}</span>
+  }
+</button>
+
+@if (abierta()) {
+  <div class="panel card">
+    <header>
+      <strong>Notificaciones</strong>
+      <button type="button" class="cerrar" (click)="cerrar()">✕</button>
+    </header>
+    <ul>
+      @for (n of notificaciones(); track n.id) {
+        <li [class.nueva]="!n.leida">
+          @if (n.link) {
+            <a [routerLink]="n.link" (click)="cerrar()">{{ n.mensaje }}</a>
+          } @else {
+            <span>{{ n.mensaje }}</span>
+          }
+          <small>{{ n.created_at | date: 'dd/MM HH:mm' }}</small>
+        </li>
+      } @empty {
+        <li class="vacio">No tenés notificaciones.</li>
+      }
+    </ul>
+  </div>
+}
