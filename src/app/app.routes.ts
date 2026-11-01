@@ -38,6 +38,12 @@ export const routes: Routes = [
         loadComponent: () => import('./componentes/mis-compras/mis-compras').then(m => m.MisCompras),
         canActivate: [authGuard]
     },
+    // Propuestas de películas (mail RPP): también solo pide sesión
+    {
+        path: 'propuestas',
+        loadComponent: () => import('./componentes/mis-propuestas/mis-propuestas').then(m => m.MisPropuestas),
+        canActivate: [authGuard]
+    },
     {
         path: 'registro',
         loadComponent: () => import('./componentes/registro/registro').then(m => m.Registro)

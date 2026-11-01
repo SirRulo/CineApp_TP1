@@ -1,0 +1,73 @@
+<section class="propuestas">
+  <h1>Proponer una película</h1>
+  <p class="ayuda">¿Falta una película en la cartelera? Contanos cuál y por qué la querés ver en el cine. Podés tener una propuesta en revisión a la vez.</p>
+
+  @if (mensaje()) {
+    <p class="mensaje" [class.ok]="exito()">{{ mensaje() }}</p>
+  }
+
+  @if (cargando()) {
+    <p class="ayuda">Cargando…</p>
+  } @else if (tienePendiente()) {
+    <p class="card aviso">Ya tenés una propuesta en revisión. Cuando la respondamos vas a poder mandar otra.</p>
+  } @else {
+    <form class="card" [formGroup]="formPropuesta" (ngSubmit)="enviar()">
+      <label>
+        Título
+        <input type="text" formControlName="titulo" />
+        @if (formPropuesta.controls.titulo.touched && formPropuesta.controls.titulo.hasError('required')) {
+          <small>El título es obligatorio</small>
+        } @else if (formPropuesta.controls.titulo.hasError('maxlength')) {
+          <small>Máximo {{ largoTitulo }} caracteres</small>
+        }
+      </label>
+
+      <label>
+        Descripción
+        <textarea rows="3" formControlName="descripcion"></textarea>
+        @if (formPropuesta.controls.descripcion.touched && formPropuesta.controls.descripcion.hasError('required')) {
+          <small>Contanos de qué se trata</small>
+        } @else if (formPropuesta.controls.descripcion.hasError('maxlength')) {
+          <small>Máximo {{ largoTexto }} caracteres</small>
+        }
+      </label>
+
+      <label>
+        ¿Por qué la querés en el cine?
+        <textarea rows="3" formControlName="motivo"></textarea>
+        @if (formPropuesta.controls.motivo.touched && formPropuesta.controls.motivo.hasError('required')) {
+          <small>Contanos por qué</small>
+        } @else if (formPropuesta.controls.motivo.hasError('maxlength')) {
+          <small>Máximo {{ largoTexto }} caracteres</small>
+        }
+      </label>
+
+      <button type="submit" [disabled]="!formPropuesta.valid || enviando()">
+        {{ enviando() ? 'Enviando…' : 'Enviar propuesta' }}
+      </button>
+    </form>
+  }
+
+  <!-- Historial: la más nueva primero, con su estado -->
+  @if (propuestas().length > 0) {
+    <h2>Tus propuestas</h2>
+    <ul>
+      @for (p of propuestas(); track p.id) {
+        <li class="card">
+          <div class="datos">
+            <strong>{{ p.titulo }}</strong>
+            <small>{{ p.created_at | date: 'dd/MM/yyyy' }}</small>
+          </div>
+          <span class="estado"
+                [class.pendiente]="p.estado === 'pendiente'"
+                [class.aceptada]="p.estado === 'aceptada'"
+                [class.rechazada]="p.estado === 'rechazada'">
+            @if (p.estado === 'pendiente') { En revisión }
+            @else if (p.estado === 'aceptada') { Aceptada }
+            @else { Rechazada }
+          </span>
+        </li>
+      }
+    </ul>
+  }
+</section>

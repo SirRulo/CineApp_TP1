@@ -15,6 +15,7 @@
       }
       @if (auth.perfil()?.rol === 'cliente') {
         <a routerLink="/mis-compras" routerLinkActive="active">Mis compras</a>
+        <a routerLink="/propuestas" routerLinkActive="active">Proponer película</a>
       }
       <span class="usuario">Hola, {{ auth.perfil()?.nombre }}</span>
       <button class="salir" (click)="salir()">Salir</button>
