@@ -68,6 +68,11 @@ const routes: Routes = [
                 path: 'propuestas',
                 loadComponent: () => import('../../componentes/lista-propuestas/lista-propuestas').then(m => m.ListaPropuestas)
             },
+            // Roles configurables (mail RPP): solo el admin (no es una sección que se pueda dar)
+            {
+                path: 'roles',
+                loadComponent: () => import('../../componentes/lista-roles/lista-roles').then(m => m.ListaRoles)
+            },
             {
                 path: 'log',
                 loadComponent: () => import('../../componentes/log-actividad/log-actividad').then(m => m.LogActividad)

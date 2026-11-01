@@ -1,0 +1,166 @@
+.roles {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  animation: riseIn 0.4s ease-out;
+}
+
+.bloque {
+  padding: 1.6rem;
+}
+
+h2 {
+  margin-top: 0;
+}
+
+.ayuda {
+  color: var(--text-soft);
+}
+
+small.ok {
+  color: var(--gold);
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  color: var(--text-soft);
+  font-weight: 600;
+}
+
+/* Checkboxes como los géneros de AltaPelicula */
+fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+legend {
+  color: var(--text-soft);
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+}
+
+.secciones {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 0.4rem 1rem;
+  margin-top: 0.4rem;
+}
+
+.check {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-main);
+  font-weight: 500;
+}
+
+.check input {
+  width: auto;
+  accent-color: var(--accent);
+}
+
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+li {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.8rem 1rem;
+  border-radius: 14px;
+  background: var(--surface-strong);
+}
+
+.datos {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.etiquetas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.etiquetas span {
+  padding: 0.1rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid rgba(167, 171, 192, 0.25);
+  color: var(--text-soft);
+  font-size: 0.8rem;
+}
+
+.etiquetas .apagado {
+  color: var(--warning);
+  border-color: var(--warning);
+}
+
+/* Solo se apagan los datos, no los botones (como en funciones y cupones) */
+.inactivo {
+  opacity: 0.55;
+}
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+button.secundario {
+  background: transparent;
+  border: 1px solid rgba(167, 171, 192, 0.35);
+  color: var(--text-main);
+}
+
+/* Asignar: usuario y rol en una fila (en celular, una debajo de otra) */
+.asignar {
+  flex-direction: row;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.asignar label {
+  flex: 1;
+  min-width: 200px;
+}
+
+h3 {
+  margin: 1.4rem 0 0.6rem;
+}
+
+.con-rol li {
+  justify-content: space-between;
+  padding: 0.6rem 1rem;
+}
+
+.con-rol small {
+  color: var(--text-soft);
+}
+
+.con-rol strong {
+  color: var(--gold);
+}
+
+@media (max-width: 480px) {
+  li {
+    flex-wrap: wrap;
+  }
+}

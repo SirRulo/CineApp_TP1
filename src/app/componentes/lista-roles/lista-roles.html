@@ -1,0 +1,126 @@
+<section class="roles">
+  @if (mensaje()) {
+    <small class="mensaje" [class.ok]="exito()">{{ mensaje() }}</small>
+  }
+
+  <!-- Alta de un rol con sus secciones -->
+  <div class="card bloque">
+    <h2>Nuevo rol</h2>
+    <p class="ayuda">Un rol da acceso a ciertas partes del panel. Se suma a lo que el usuario ya podía hacer (cliente o empleado).</p>
+
+    <form [formGroup]="formRol" (ngSubmit)="crear()">
+      <label>
+        Nombre
+        <input type="text" placeholder="Ej.: Reportes" formControlName="nombre" />
+        @if (formRol.controls.nombre.touched && formRol.controls.nombre.hasError('required')) {
+          <small>El nombre es obligatorio</small>
+        } @else if (formRol.controls.nombre.hasError('maxlength')) {
+          <small>Máximo 40 caracteres</small>
+        }
+      </label>
+
+      <fieldset>
+        <legend>Secciones a las que entra</legend>
+        <div class="secciones">
+          @for (s of secciones; track s.path) {
+            <label class="check">
+              <input type="checkbox"
+                     [checked]="seccionesNuevas().includes(s.path)"
+                     (change)="alternarNueva(s.path)" />
+              {{ s.nombre }}
+            </label>
+          }
+        </div>
+      </fieldset>
+
+      <button type="submit" [disabled]="!formRol.valid || seccionesNuevas().length === 0">Crear rol</button>
+    </form>
+  </div>
+
+  <!-- Roles creados -->
+  <div class="card bloque">
+    <h2>Roles</h2>
+    <ul>
+      @for (rol of roles(); track rol.id) {
+        <li>
+          <div class="datos" [class.inactivo]="!rol.activo">
+            <strong>{{ rol.nombre }}</strong>
+            @if (editando() === rol.id) {
+              <div class="secciones">
+                @for (s of secciones; track s.path) {
+                  <label class="check">
+                    <input type="checkbox"
+                           [checked]="seccionesEditadas().includes(s.path)"
+                           (change)="alternarEditada(s.path)" />
+                    {{ s.nombre }}
+                  </label>
+                }
+              </div>
+            } @else {
+              <span class="etiquetas">
+                @for (nombre of seccionesDe(rol.id!); track nombre) {
+                  <span>{{ nombre }}</span>
+                } @empty {
+                  <span>Sin secciones</span>
+                }
+                @if (!rol.activo) {
+                  <span class="apagado">Inactivo</span>
+                }
+              </span>
+            }
+          </div>
+          <div class="acciones">
+            @if (editando() === rol.id) {
+              <button type="button" [disabled]="seccionesEditadas().length === 0" (click)="guardarSecciones(rol)">Guardar</button>
+              <button type="button" class="secundario" (click)="cancelarEdicion()">Cancelar</button>
+            } @else {
+              <button type="button" class="secundario" (click)="editar(rol)">Editar secciones</button>
+              <button type="button" class="secundario" (click)="alternarActivo(rol)">
+                {{ rol.activo ? 'Desactivar' : 'Activar' }}
+              </button>
+            }
+          </div>
+        </li>
+      } @empty {
+        <p class="ayuda">Todavía no hay roles creados.</p>
+      }
+    </ul>
+  </div>
+
+  <!-- Asignar un rol a un usuario -->
+  <div class="card bloque">
+    <h2>Asignar rol</h2>
+    <form class="asignar" [formGroup]="formAsignar" (ngSubmit)="asignar()">
+      <label>
+        Usuario
+        <select formControlName="usuario_id">
+          @for (u of usuariosAsignables(); track u.id) {
+            <option [ngValue]="u.id">{{ u.apellido }}, {{ u.nombre }} ({{ u.email }})</option>
+          }
+        </select>
+      </label>
+      <label>
+        Rol
+        <select formControlName="rol_id">
+          <option [ngValue]="null">Sin rol</option>
+          @for (rol of rolesActivos(); track rol.id) {
+            <option [ngValue]="rol.id">{{ rol.nombre }}</option>
+          }
+        </select>
+      </label>
+      <button type="submit" [disabled]="!formAsignar.valid">Asignar</button>
+    </form>
+
+    @if (usuariosConRol().length > 0) {
+      <h3>Usuarios con rol</h3>
+      <ul class="con-rol">
+        @for (u of usuariosConRol(); track u.id) {
+          <li>
+            <span>{{ u.nombre }} {{ u.apellido }} <small>({{ u.rol }})</small></span>
+            <strong>{{ nombreDeRol(u.rol_id) }}</strong>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+</section>

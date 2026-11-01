@@ -35,9 +35,10 @@ export class Auth {
         return this.supabase.from('perfiles').select('*').eq('id', id);
     }
 
-    // Para el log del admin: solo lo necesario para mostrar quién hizo cada acción
+    // Para el log, las propuestas y los roles del admin: solo lo necesario para mostrar a cada usuario
+    // (email y rol_id los usa la pantalla de roles para asignar un rol configurable)
     getPerfiles() {
-        return this.supabase.from('perfiles').select('id, nombre, apellido, rol');
+        return this.supabase.from('perfiles').select('id, nombre, apellido, rol, email, rol_id').order('apellido');
     }
 
     crearPerfil(perfil: Perfil) {
