@@ -6,6 +6,7 @@ import { Funcion } from '../../models/funcion';
 import { Pelicula } from '../../models/pelicula';
 import { Auth } from '../../servicios/auth';
 import { Compras } from '../../servicios/compras';
+import { ListaEspera } from '../../servicios/lista-espera';
 import { Funciones } from '../../servicios/funciones';
 import { Peliculas } from '../../servicios/peliculas';
 import { Puntos } from '../../servicios/puntos';
@@ -45,6 +46,7 @@ export class MisCompras implements OnInit {
     private funcionesService: Funciones,
     private peliculasService: Peliculas,
     private puntosService: Puntos,
+    private listaEspera: ListaEspera,
   ) {}
 
   async ngOnInit() {
@@ -158,6 +160,13 @@ export class MisCompras implements OnInit {
       });
       if (reverso.error) {
         console.error('No se pudieron descontar los puntos:', reverso.error.message);
+      }
+    }
+    // 5) Lista de espera (mail RPP): cada butaca liberada va al primero que espera, con aviso
+    if (!entradas.error && v.funcion) {
+      const descripcion = `"${v.titulo}" del ${new Date(v.funcion.inicio).toLocaleString('es-AR')}`;
+      for (const entrada of entradas.data) {
+        await this.listaEspera.avisarAlPrimero(c.funcion_id, entrada.butaca_id, descripcion);
       }
     }
     this.cancelando.set(null);

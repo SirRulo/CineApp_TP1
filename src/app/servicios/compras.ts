@@ -90,8 +90,10 @@ export class Compras {
     }
 
     // Las entradas canceladas dejan de ocupar la butaca (getButacasOcupadas solo mira las activas)
+    // .select(): devuelve las entradas canceladas → sus butaca_id son las que quedaron libres
+    // (para avisar a la lista de espera)
     cancelarEntradasDeCompra(compraId: number) {
-        return this.supabase.from('entradas').update({ estado: 'cancelada' }).eq('compra_id', compraId);
+        return this.supabase.from('entradas').update({ estado: 'cancelada' }).eq('compra_id', compraId).select();
     }
 
     addMovimientoCredito(movimiento: MovimientoCredito) {
