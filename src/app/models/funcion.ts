@@ -9,4 +9,5 @@ export interface Funcion {
     precio: number;
     precio_vip: number;
     activa?: boolean;
+    cancelada_en?: string | null;   // con fecha = la suspendió el cine (lo vendido pasó a crédito)
 }

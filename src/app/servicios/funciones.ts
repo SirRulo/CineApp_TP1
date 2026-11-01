@@ -78,4 +78,11 @@ export class Funciones {
     updateFuncion(funcion: Funcion) {
         return this.supabase.from('funciones').update(funcion).eq('id', funcion.id);
     }
+
+    // Cancelación por el cine (mail RPP): la hace la función cancelar_funcion de la base,
+    // en una sola transacción (todo o nada). rpc = llamar a una función de Postgres.
+    // data = { acreditadas, anonimas, monto }; si algo falla, error y la base no cambió nada
+    cancelarFuncion(funcionId: number) {
+        return this.supabase.rpc('cancelar_funcion', { p_funcion_id: funcionId });
+    }
 }

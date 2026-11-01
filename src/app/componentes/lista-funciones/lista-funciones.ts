@@ -5,6 +5,7 @@ import { Funcion } from '../../models/funcion';
 import { Pelicula } from '../../models/pelicula';
 import { Sala } from '../../models/sala';
 import { Funciones } from '../../servicios/funciones';
+import { Log } from '../../servicios/log';
 import { Peliculas } from '../../servicios/peliculas';
 import { haySolapamiento } from '../../validators/funcion.validators';
 
@@ -20,8 +21,10 @@ export class ListaFunciones implements OnInit {
   peliculas = signal<Pelicula[]>([]);
   salas = signal<Sala[]>([]);
   mensaje = signal('');
+  exito = signal(false);
+  cancelando = signal<number | null>(null);   // id de la función que se está cancelando
 
-  constructor(private funcionesService: Funciones, private peliculasService: Peliculas) {}
+  constructor(private funcionesService: Funciones, private peliculasService: Peliculas, private log: Log) {}
 
   async ngOnInit() {
     const peliculas = await this.peliculasService.getPeliculas();
@@ -93,6 +96,43 @@ export class ListaFunciones implements OnInit {
       return;
     }
     this.mensaje.set('');
+    this.exito.set(false);
+    this.cargarFunciones();
+  }
+
+  // Se puede cancelar mientras no esté cancelada y no haya terminado (la base lo vuelve a controlar)
+  puedeCancelarse(funcion: Funcion) {
+    return !funcion.cancelada_en && new Date(funcion.fin) > new Date();
+  }
+
+  // Cancelación por el cine (mail RPP): todo lo hace la función de la base en una transacción
+  async cancelar(funcion: Funcion) {
+    const titulo = this.tituloDe(funcion.pelicula_id);
+    if (!confirm(`¿Cancelar la función de "${titulo}"? Todas las compras pasan a crédito, se liberan las butacas y se avisa a los compradores. No se puede deshacer.`)) {
+      return;
+    }
+    this.cancelando.set(funcion.id!);
+    const result = await this.funcionesService.cancelarFuncion(funcion.id!);
+    this.cancelando.set(null);
+
+    if (result.error) {
+      // La transacción se deshizo: no se acreditó a nadie
+      this.exito.set(false);
+      this.mensaje.set('No se pudo cancelar la función (no se hizo ningún cambio): ' + result.error.message);
+      return;
+    }
+
+    const r = result.data;
+    let texto = `Función cancelada. ${r.acreditadas} compra(s) con cuenta recibieron $${r.monto} de crédito en total y un aviso.`;
+    if (r.anonimas > 0) {
+      texto += ` ${r.anonimas} compra(s) anónima(s): reintegro en boletería con el código.`;
+    }
+    this.exito.set(true);
+    this.mensaje.set(texto);
+
+    await this.log.registrar('Cancelar función',
+      `"${titulo}" del ${new Date(funcion.inicio).toLocaleString('es-AR')} en ${this.salaDe(funcion.sala_id)}: `
+      + `${r.acreditadas} con crédito ($${r.monto}), ${r.anonimas} anónimas`);
     this.cargarFunciones();
   }
 }

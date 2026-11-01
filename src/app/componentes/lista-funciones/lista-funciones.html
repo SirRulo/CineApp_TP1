@@ -5,7 +5,7 @@
   </header>
 
   @if (mensaje()) {
-    <small>{{ mensaje() }}</small>
+    <small [class.ok]="exito()">{{ mensaje() }}</small>
   }
 
   @if (funciones().length > 0) {
@@ -22,19 +22,33 @@
             <span>{{ salaDe(funcion.sala_id) }} · {{ funcion.formato }} · {{ funcion.idioma === 'castellano' ? 'Castellano' : 'Subtitulada' }}</span>
             <span>$ {{ funcion.precio }} · VIP $ {{ funcion.precio_vip }}</span>
             <span class="etiquetas">
-              <span>{{ funcion.activa ? 'Activa' : 'Inactiva' }}</span>
-              @if (!funcion.activa && !puedeActivarse(funcion)) {
+              @if (funcion.cancelada_en) {
+                <span class="cancelada">Cancelada el {{ funcion.cancelada_en | date: 'dd/MM HH:mm' }}</span>
+              } @else {
+                <span>{{ funcion.activa ? 'Activa' : 'Inactiva' }}</span>
+              }
+              @if (!funcion.activa && !funcion.cancelada_en && !puedeActivarse(funcion)) {
                 <span class="ocupado">Horario ocupado</span>
               }
             </span>
           </div>
           <div class="acciones">
-            <!-- Una inactiva cuyo horario ya está tomado no se puede activar: botón deshabilitado -->
-            <button type="button"
-                    [disabled]="!funcion.activa && !puedeActivarse(funcion)"
-                    (click)="alternarActiva(funcion)">
-              {{ funcion.activa ? 'Desactivar' : 'Activar' }}
-            </button>
+            <!-- Una cancelada ya no se reactiva: lo vendido pasó a crédito -->
+            @if (!funcion.cancelada_en) {
+              <!-- Una inactiva cuyo horario ya está tomado no se puede activar: botón deshabilitado -->
+              <button type="button"
+                      [disabled]="!funcion.activa && !puedeActivarse(funcion)"
+                      (click)="alternarActiva(funcion)">
+                {{ funcion.activa ? 'Desactivar' : 'Activar' }}
+              </button>
+            }
+            @if (puedeCancelarse(funcion)) {
+              <button type="button" class="secundario"
+                      [disabled]="cancelando() !== null"
+                      (click)="cancelar(funcion)">
+                {{ cancelando() === funcion.id ? 'Cancelando…' : 'Cancelar función' }}
+              </button>
+            }
           </div>
         </li>
       }

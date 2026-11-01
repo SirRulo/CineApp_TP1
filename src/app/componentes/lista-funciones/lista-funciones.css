@@ -92,6 +92,8 @@ li.inactiva .datos {
 .acciones {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 0.6rem;
 }
 
 .vacio {
@@ -108,4 +110,20 @@ li.inactiva .datos {
     width: 100%;
     justify-content: flex-end;
   }
+}
+
+.etiquetas .cancelada {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* Cancelar función: borde, sin rojo de fondo (como en cupones) */
+button.secundario {
+  background: transparent;
+  border: 1px solid rgba(167, 171, 192, 0.35);
+  color: var(--text-main);
+}
+
+small.ok {
+  color: var(--gold);
 }
