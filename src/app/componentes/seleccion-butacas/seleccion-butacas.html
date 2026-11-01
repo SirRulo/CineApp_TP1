@@ -14,6 +14,18 @@
       </p>
     </div>
 
+    <!-- Lista de espera: me avisaron que se liberó una butaca y me la guardan 15 minutos -->
+    @if (miTurno(); as turno) {
+      <div class="turno card">
+        <strong>¡Es tu turno!</strong>
+        <span>
+          Te guardamos la butaca
+          @if (miButacaGuardada(); as b) { <b>{{ b.fila }}{{ b.numero }}</b> }
+          hasta las <b>{{ listaEspera.venceEn(turno) | date: 'HH:mm' }}</b>. Elegila en el mapa y comprala antes de esa hora.
+        </span>
+      </div>
+    }
+
     <div class="sala card">
       <div class="pantalla">Pantalla</div>
 

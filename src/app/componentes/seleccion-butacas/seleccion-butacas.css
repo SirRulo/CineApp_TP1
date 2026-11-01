@@ -221,3 +221,20 @@ button.secundario {
   border: 1px solid rgba(167, 171, 192, 0.35);
   color: var(--text-main);
 }
+
+/* Cartel del turno de la lista de espera */
+.turno {
+  padding: 1rem 1.3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  border: 1px solid var(--gold);
+}
+
+.turno strong {
+  color: var(--gold);
+}
+
+.turno b {
+  color: var(--gold);
+}

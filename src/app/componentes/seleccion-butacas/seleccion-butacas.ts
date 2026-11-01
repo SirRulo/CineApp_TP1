@@ -50,7 +50,7 @@ export class SeleccionButacas implements OnInit, OnDestroy {
     private funcionesService: Funciones,
     private peliculasService: Peliculas,
     private carrito: Carrito,
-    private listaEspera: ListaEspera,
+    public listaEspera: ListaEspera,   // public: el HTML usa venceEn() para el cartel del turno
     public auth: Auth,   // public: el HTML pregunta si hay sesión para la lista de espera
   ) {}
 
@@ -93,6 +93,7 @@ export class SeleccionButacas implements OnInit, OnDestroy {
     await this.cargarEspera(id);
 
     // Tiempo real: si alguien compra (o cancela) una butaca de esta función, se recargan las ocupadas
+    // y la lista de espera (al cancelar, la butaca liberada puede quedar guardada para un avisado)
     this.canal = this.funcionesService.escucharEntradas(id, () => this.recargarOcupadas(id));
   }
 
@@ -110,12 +111,13 @@ export class SeleccionButacas implements OnInit, OnDestroy {
     if (result.error) {
       return; // se queda con lo que tenía; la barrera final sigue siendo el índice único al pagar
     }
-    const ocupadas: number[] = result.data.map(fila => fila.butaca_id);
-    this.ocupadas.set(ocupadas);
+    this.ocupadas.set(result.data.map(fila => fila.butaca_id));
+    await this.cargarEspera(funcionId);
 
-    const perdidas = this.seleccionadas().filter(b => ocupadas.includes(b.id));
+    // estaOcupada cuenta también las reservadas para un avisado de la lista de espera
+    const perdidas = this.seleccionadas().filter(b => this.estaOcupada(b));
     if (perdidas.length > 0) {
-      this.seleccionadas.set(this.seleccionadas().filter(b => !ocupadas.includes(b.id)));
+      this.seleccionadas.set(this.seleccionadas().filter(b => !this.estaOcupada(b)));
       const nombres = perdidas.map(b => b.fila + b.numero).join(', ');
       this.mensaje.set(`Otra persona acaba de comprar: ${nombres}. Elegí otra.`);
     }
@@ -132,9 +134,39 @@ export class SeleccionButacas implements OnInit, OnDestroy {
     this.espera.set(result.data);
   }
 
-  // Agotada = todas las butacas de la sala están vendidas
+  // Butacas guardadas para OTROS avisados con el turno vigente: para mí se ven ocupadas
+  reservadas() {
+    const perfil = this.auth.perfil();
+    return this.espera()
+      .filter(e => this.listaEspera.turnoVigente(e) && e.usuario_id !== perfil?.id)
+      .map(e => e.butaca_id!);
+  }
+
+  // Mi turno, si me avisaron y siguen corriendo mis 15 minutos (null = no tengo)
+  miTurno() {
+    const mia = this.miEspera();
+    return mia && this.listaEspera.turnoVigente(mia) ? mia : null;
+  }
+
+  // La butaca que me guardaron (para el cartel)
+  miButacaGuardada() {
+    const turno = this.miTurno();
+    if (!turno) {
+      return null;
+    }
+    for (const fila of this.filas()) {
+      const b = fila.posiciones.find(p => p?.id === turno.butaca_id);
+      if (b) {
+        return b;
+      }
+    }
+    return null;
+  }
+
+  // Agotada = no queda ninguna butaca que yo pueda comprar (vendidas + guardadas para otros)
   agotada() {
-    return this.totalButacas() > 0 && this.ocupadas().length >= this.totalButacas();
+    return this.totalButacas() > 0
+      && this.ocupadas().length + this.reservadas().length >= this.totalButacas();
   }
 
   // Mi lugar en la fila (null = no estoy anotado)
@@ -197,8 +229,9 @@ export class SeleccionButacas implements OnInit, OnDestroy {
     return filas;
   }
 
+  // Vendida, o guardada 15 min para otra persona de la lista de espera
   estaOcupada(b: Butaca) {
-    return this.ocupadas().includes(b.id);
+    return this.ocupadas().includes(b.id) || this.reservadas().includes(b.id);
   }
 
   estaSeleccionada(b: Butaca) {

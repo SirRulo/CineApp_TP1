@@ -30,6 +30,20 @@ export class ListaEspera {
         return this.supabase.from('lista_espera').insert([espera]);
     }
 
+    // ---------- Turno de 15 minutos del avisado ----------
+
+    readonly minutosTurno = 15;
+
+    // Hasta cuándo le guardamos la butaca (avisado_en + 15 min)
+    venceEn(espera: Espera) {
+        return new Date(new Date(espera.avisado_en!).getTime() + this.minutosTurno * 60000);
+    }
+
+    // Avisado y todavía dentro de sus 15 minutos
+    turnoVigente(espera: Espera) {
+        return espera.estado === 'avisado' && !!espera.avisado_en && this.venceEn(espera) > new Date();
+    }
+
     // Baja lógica: queda el historial, como el resto del proyecto
     salir(id: number) {
         return this.supabase.from('lista_espera').update({ estado: 'salio' }).eq('id', id);
