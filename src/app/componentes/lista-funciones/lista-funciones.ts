@@ -5,6 +5,7 @@ import { Funcion } from '../../models/funcion';
 import { Pelicula } from '../../models/pelicula';
 import { Sala } from '../../models/sala';
 import { Funciones } from '../../servicios/funciones';
+import { ListaEspera } from '../../servicios/lista-espera';
 import { Log } from '../../servicios/log';
 import { Peliculas } from '../../servicios/peliculas';
 import { haySolapamiento } from '../../validators/funcion.validators';
@@ -23,8 +24,15 @@ export class ListaFunciones implements OnInit {
   mensaje = signal('');
   exito = signal(false);
   cancelando = signal<number | null>(null);   // id de la función que se está cancelando
+  // Cuántos esperan en cada función (lista de espera, mail RPP): { funcionId: cantidad }
+  enEspera = signal<{ [funcionId: number]: number }>({});
 
-  constructor(private funcionesService: Funciones, private peliculasService: Peliculas, private log: Log) {}
+  constructor(
+    private funcionesService: Funciones,
+    private peliculasService: Peliculas,
+    private log: Log,
+    private listaEspera: ListaEspera,
+  ) {}
 
   async ngOnInit() {
     const peliculas = await this.peliculasService.getPeliculas();
@@ -51,6 +59,21 @@ export class ListaFunciones implements OnInit {
       return;
     }
     this.funciones.set(result.data);
+    await this.contarEspera();
+  }
+
+  // Una sola consulta y un contador por función, como las ventas del top 3 (S2)
+  private async contarEspera() {
+    const result = await this.listaEspera.getEsperaActiva();
+    if (result.error) {
+      console.error(result.error);   // el listado se muestra igual
+      return;
+    }
+    const contador: { [funcionId: number]: number } = {};
+    for (const fila of result.data) {
+      contador[fila.funcion_id] = (contador[fila.funcion_id] ?? 0) + 1;
+    }
+    this.enEspera.set(contador);
   }
 
   tituloDe(peliculaId: number) {

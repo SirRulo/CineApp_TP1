@@ -23,6 +23,18 @@ export class ListaEspera {
             .order('created_at');
     }
 
+    // Las filas en las que está anotado un cliente (para su perfil)
+    getEsperaDeUsuario(usuarioId: string) {
+        return this.supabase.from('lista_espera').select('*')
+            .eq('usuario_id', usuarioId).in('estado', ['esperando', 'avisado']);
+    }
+
+    // Todos los que siguen esperando, de todas las funciones (el admin los cuenta por función)
+    getEsperaActiva() {
+        return this.supabase.from('lista_espera').select('funcion_id')
+            .in('estado', ['esperando', 'avisado']);
+    }
+
     // Si ya está en la fila de esa función, el índice una_vez_en_la_lista
     // de la base rechaza el insert con el error 23505
     anotarse(funcionId: number, usuarioId: string) {

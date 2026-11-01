@@ -127,3 +127,9 @@ button.secundario {
 small.ok {
   color: var(--gold);
 }
+
+/* Gente en la lista de espera (mail RPP) */
+.etiquetas .espera {
+  color: var(--gold);
+  border-color: var(--gold);
+}

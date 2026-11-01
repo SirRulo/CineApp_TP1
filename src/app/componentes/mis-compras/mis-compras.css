@@ -112,3 +112,50 @@ li.cancelada .datos {
   border-radius: 8px;
   flex-shrink: 0;
 }
+
+/* Listas de espera (mail RPP) */
+.esperas {
+  padding: 1.2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.esperas > span {
+  color: var(--text-soft);
+}
+
+.esperas ul {
+  margin: 0;
+  gap: 0.5rem;
+}
+
+.esperas li {
+  padding: 0.5rem 0.8rem;
+  border-radius: 10px;
+  background: var(--surface-strong);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.esperas li div {
+  display: flex;
+  flex-direction: column;
+}
+
+.esperas small {
+  color: var(--text-soft);
+}
+
+.esperas .puesto {
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.esperas .turno {
+  color: var(--gold);
+  font-weight: 700;
+}

@@ -27,6 +27,9 @@
               } @else {
                 <span>{{ funcion.activa ? 'Activa' : 'Inactiva' }}</span>
               }
+              @if (enEspera()[funcion.id!]) {
+                <span class="espera">{{ enEspera()[funcion.id!] }} en espera</span>
+              }
               @if (!funcion.activa && !funcion.cancelada_en && !puedeActivarse(funcion)) {
                 <span class="ocupado">Horario ocupado</span>
               }

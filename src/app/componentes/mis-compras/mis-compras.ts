@@ -2,6 +2,7 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
 import { Component, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Compra } from '../../models/compra';
+import { Espera } from '../../models/espera';
 import { Funcion } from '../../models/funcion';
 import { Pelicula } from '../../models/pelicula';
 import { Auth } from '../../servicios/auth';
@@ -19,6 +20,15 @@ interface CompraVista {
   entradas: number;   // entradas activas (o las que tenía, si se canceló)
 }
 
+// Una lista de espera del cliente con lo necesario para mostrarla (mail RPP)
+interface EsperaVista {
+  espera: Espera;
+  titulo: string;
+  funcion: Funcion;
+  posicion: number;   // su lugar en la fila (1 = el primero)
+  total: number;      // cuántos esperan en esa función
+}
+
 // Historial de compras del cliente + saldo de crédito + cancelación (hasta 2 h antes)
 @Component({
   imports: [CurrencyPipe, DatePipe, RouterLink],
@@ -33,6 +43,7 @@ export class MisCompras implements OnInit {
   compras = signal<CompraVista[]>([]);
   saldo = signal(0);
   puntos = signal(0);   // saldo de puntos (suma de movimientos)
+  esperas = signal<EsperaVista[]>([]);
   cargando = signal(true);
   cancelando = signal<number | null>(null);   // id de la compra que se está cancelando
   mensaje = signal('');
@@ -46,7 +57,7 @@ export class MisCompras implements OnInit {
     private funcionesService: Funciones,
     private peliculasService: Peliculas,
     private puntosService: Puntos,
-    private listaEspera: ListaEspera,
+    public listaEspera: ListaEspera,   // public: el HTML usa venceEn() para el turno
   ) {}
 
   async ngOnInit() {
@@ -84,12 +95,45 @@ export class MisCompras implements OnInit {
       });
     }
     this.compras.set(vistas);
+    await this.cargarEsperas(funciones.data, peliculas.data);
 
     const saldo = await this.comprasService.getSaldoCredito(this.usuarioId);
     this.saldo.set(saldo ?? 0);
     const puntos = await this.puntosService.getSaldo(this.usuarioId);
     this.puntos.set(puntos ?? 0);
     this.cargando.set(false);
+  }
+
+  // Mis listas de espera con la posición en cada una. De paso vence los turnos pasados de esas
+  // funciones (la cuenta perezosa no depende solo de que alguien abra el mapa)
+  private async cargarEsperas(funciones: Funcion[], peliculas: Pelicula[]) {
+    const mias = await this.listaEspera.getEsperaDeUsuario(this.usuarioId);
+    if (mias.error) {
+      console.error(mias.error);
+      return;
+    }
+    const vistas: EsperaVista[] = [];
+    for (const e of mias.data as Espera[]) {
+      const funcion = funciones.find(f => f.id === e.funcion_id);
+      if (!funcion || new Date(funcion.inicio) < new Date()) {
+        continue;   // función que ya no existe o ya empezó: no tiene sentido mostrarla
+      }
+      const titulo = peliculas.find(p => p.id === funcion.pelicula_id)?.titulo ?? '(película)';
+      await this.listaEspera.vencerTurnos(funcion.id!, `"${titulo}" del ${new Date(funcion.inicio).toLocaleString('es-AR')}`);
+
+      // La fila actualizada (después de vencer): mi posición = mi lugar + 1
+      const fila = await this.listaEspera.getEsperaDeFuncion(funcion.id!);
+      if (fila.error) {
+        continue;
+      }
+      const lista: Espera[] = fila.data;
+      const yo = lista.find(f => f.id === e.id);
+      if (!yo) {
+        continue;   // se me venció el turno recién: ya no estoy en la fila
+      }
+      vistas.push({ espera: yo, titulo, funcion, posicion: lista.indexOf(yo) + 1, total: lista.length });
+    }
+    this.esperas.set(vistas);
   }
 
   // '' = se puede cancelar; si no, el motivo (se muestra en lugar del botón)
