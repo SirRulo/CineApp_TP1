@@ -49,6 +49,48 @@ export class ListaEspera {
         return this.supabase.from('lista_espera').update({ estado: 'salio' }).eq('id', id);
     }
 
+    // Cuenta perezosa de los 15 min (no hay nada corriendo en el servidor): la llama el mapa
+    // al abrirse y con cada aviso de Realtime. Los avisados a los que se les pasó el turno
+    // pasan a 'vencido' y su butaca va al siguiente de la fila.
+    async vencerTurnos(funcionId: number, descripcion: string) {
+        const result = await this.supabase.from('lista_espera').select('*')
+            .eq('funcion_id', funcionId).eq('estado', 'avisado');
+        if (result.error) {
+            console.error(result.error);
+            return;
+        }
+        for (const espera of result.data as Espera[]) {
+            if (this.turnoVigente(espera)) {
+                continue;
+            }
+            // Solo si sigue avisado: si dos personas abren el mapa a la vez, lo vence una sola
+            const vencido = await this.supabase.from('lista_espera').update({ estado: 'vencido' })
+                .eq('id', espera.id).eq('estado', 'avisado').select();
+            if (vencido.error || vencido.data.length === 0) {
+                continue;
+            }
+            const aviso = await this.notificaciones.addNotificaciones([{
+                usuario_id: espera.usuario_id,
+                mensaje: `Se venció tu turno para ${descripcion}: pasaron ${this.minutosTurno} minutos sin comprar.`,
+                link: null,
+            }]);
+            if (aviso.error) {
+                console.error(aviso.error);
+            }
+            // La butaca pasa al siguiente, salvo que justo la haya comprado alguien
+            if (espera.butaca_id && await this.butacaLibre(funcionId, espera.butaca_id)) {
+                await this.avisarAlPrimero(funcionId, espera.butaca_id, descripcion);
+            }
+        }
+    }
+
+    // ¿Nadie tiene una entrada activa para esa butaca en esa función?
+    private async butacaLibre(funcionId: number, butacaId: number) {
+        const result = await this.supabase.from('entradas').select('id')
+            .eq('funcion_id', funcionId).eq('butaca_id', butacaId).eq('estado', 'activa');
+        return !result.error && result.data.length === 0;
+    }
+
     // Le guarda la butaca y arranca sus 15 min, SOLO si sigue esperando (como validarIngreso:
     // chequeo y cambio en una sentencia). data vacío = a esa persona ya la avisó otra cancelación
     private marcarAvisado(id: number, butacaId: number) {

@@ -90,6 +90,7 @@ export class SeleccionButacas implements OnInit, OnDestroy {
     this.ocupadas.set(ocupadas.data.map(fila => fila.butaca_id));
     this.filas.set(this.armarFilas(butacas.data));
     this.totalButacas.set(butacas.data.length);
+    await this.listaEspera.vencerTurnos(id, this.descripcion());
     await this.cargarEspera(id);
 
     // Tiempo real: si alguien compra (o cancela) una butaca de esta función, se recargan las ocupadas
@@ -112,6 +113,7 @@ export class SeleccionButacas implements OnInit, OnDestroy {
       return; // se queda con lo que tenía; la barrera final sigue siendo el índice único al pagar
     }
     this.ocupadas.set(result.data.map(fila => fila.butaca_id));
+    await this.listaEspera.vencerTurnos(funcionId, this.descripcion());
     await this.cargarEspera(funcionId);
 
     // estaOcupada cuenta también las reservadas para un avisado de la lista de espera
@@ -124,6 +126,13 @@ export class SeleccionButacas implements OnInit, OnDestroy {
   }
 
   // ---------- Lista de espera (mail RPP) ----------
+
+  // Para los avisos: '"Título" del 15/11/2026, 20:30:00' (como en MisCompras)
+  private descripcion() {
+    const funcion = this.funcion();
+    const fecha = funcion ? new Date(funcion.inicio).toLocaleString('es-AR') : '';
+    return `"${this.pelicula()?.titulo ?? ''}" del ${fecha}`;
+  }
 
   private async cargarEspera(funcionId: number) {
     const result = await this.listaEspera.getEsperaDeFuncion(funcionId);
