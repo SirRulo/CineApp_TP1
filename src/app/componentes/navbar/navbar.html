@@ -13,6 +13,10 @@
       @if (auth.perfil()?.rol === 'empleado') {
         <a routerLink="/empleado" routerLinkActive="active">Empleado</a>
       }
+      <!-- Rol configurable (mail RPP): un cliente o empleado con secciones del panel -->
+      @if (auth.perfil()?.rol !== 'admin' && auth.secciones().length > 0) {
+        <a routerLink="/admin" routerLinkActive="active">Panel</a>
+      }
       @if (auth.perfil()?.rol === 'cliente') {
         <a routerLink="/mis-compras" routerLinkActive="active">Mis compras</a>
         <a routerLink="/propuestas" routerLinkActive="active">Proponer película</a>

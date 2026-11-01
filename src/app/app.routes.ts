@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth-guard';
+import { panelGuard } from './guards/panel-guard';
 import { roleGuard } from './guards/role-guard';
 
 export const routes: Routes = [
@@ -53,11 +54,11 @@ export const routes: Routes = [
         loadComponent: () => import('./componentes/login/login').then(m => m.Login)
     },
     // Panel admin como módulo con carga perezosa (loadChildren), como mi-modulo de la cátedra.
-    // canMatch: si el rol no coincide, para ese usuario la ruta "no existe" y termina en '**'.
-    // Al estar acá, protege todas las rutas del módulo.
+    // canMatch: si no puede entrar, para ese usuario la ruta "no existe" y termina en '**'.
+    // panelGuard (mail RPP): el admin o quien tenga un rol configurable; cada pantalla la controla seccionGuard.
     {
         path: 'admin',
-        canMatch: [roleGuard('admin')],
+        canMatch: [panelGuard],
         loadChildren: () => import('./modulos/admin/admin-module').then(m => m.AdminModule)
     },
     {

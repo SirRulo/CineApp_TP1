@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { Admin } from '../../componentes/admin/admin';
+import { seccionGuard } from '../../guards/seccion-guard';
 
 // Rutas del panel admin. Son relativas a /admin (el path 'admin' está en app.routes.ts).
 // Admin es el marco (menú + <router-outlet />); las pantallas son sus hijas, cada una
@@ -9,6 +10,8 @@ const routes: Routes = [
     {
         path: '',
         component: Admin,
+        // Antes de cada hija: ¿tiene esa sección? (roles configurables, mail RPP)
+        canActivateChild: [seccionGuard],
         children: [
             // /admin a secas muestra el listado
             {

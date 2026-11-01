@@ -2,20 +2,39 @@
 <div class="panel">
   <aside class="menu card">
     <h2>Administración</h2>
+    <!-- Cada link solo si puede entrar a esa sección: el admin ve todo; un rol configurable, lo suyo.
+         Ocultar el link es ayuda visual: la seguridad la ponen panelGuard y seccionGuard -->
     <nav>
-      <!-- exact: si no, "Películas" también se marcaría activo en /admin/peliculas/nueva -->
-      <a routerLink="/admin/peliculas" routerLinkActive="activo" [routerLinkActiveOptions]="{ exact: true }">Películas</a>
-      <a routerLink="/admin/peliculas/nueva" routerLinkActive="activo">Nueva película</a>
-      <a routerLink="/admin/funciones" routerLinkActive="activo" [routerLinkActiveOptions]="{ exact: true }">Funciones</a>
-      <a routerLink="/admin/funciones/nueva" routerLinkActive="activo">Nueva función</a>
-      <a routerLink="/admin/funciones/programar" routerLinkActive="activo">Programar funciones</a>
-      <a routerLink="/admin/productos" routerLinkActive="activo" [routerLinkActiveOptions]="{ exact: true }">Candy bar</a>
-      <a routerLink="/admin/productos/nuevo" routerLinkActive="activo">Nuevo producto</a>
-      <a routerLink="/admin/cupones" routerLinkActive="activo">Cupones</a>
-      <a routerLink="/admin/propuestas" routerLinkActive="activo">Propuestas</a>
-      <a routerLink="/admin/reportes" routerLinkActive="activo">Reportes</a>
-      <a routerLink="/admin/log" routerLinkActive="activo">Actividad</a>
-      <a routerLink="/admin/roles" routerLinkActive="activo">Roles</a>
+      @if (auth.puedeEntrar('peliculas')) {
+        <!-- exact: si no, "Películas" también se marcaría activo en /admin/peliculas/nueva -->
+        <a routerLink="/admin/peliculas" routerLinkActive="activo" [routerLinkActiveOptions]="{ exact: true }">Películas</a>
+        <a routerLink="/admin/peliculas/nueva" routerLinkActive="activo">Nueva película</a>
+      }
+      @if (auth.puedeEntrar('funciones')) {
+        <a routerLink="/admin/funciones" routerLinkActive="activo" [routerLinkActiveOptions]="{ exact: true }">Funciones</a>
+        <a routerLink="/admin/funciones/nueva" routerLinkActive="activo">Nueva función</a>
+        <a routerLink="/admin/funciones/programar" routerLinkActive="activo">Programar funciones</a>
+      }
+      @if (auth.puedeEntrar('productos')) {
+        <a routerLink="/admin/productos" routerLinkActive="activo" [routerLinkActiveOptions]="{ exact: true }">Candy bar</a>
+        <a routerLink="/admin/productos/nuevo" routerLinkActive="activo">Nuevo producto</a>
+      }
+      @if (auth.puedeEntrar('cupones')) {
+        <a routerLink="/admin/cupones" routerLinkActive="activo">Cupones</a>
+      }
+      @if (auth.puedeEntrar('propuestas')) {
+        <a routerLink="/admin/propuestas" routerLinkActive="activo">Propuestas</a>
+      }
+      @if (auth.puedeEntrar('reportes')) {
+        <a routerLink="/admin/reportes" routerLinkActive="activo">Reportes</a>
+      }
+      @if (auth.puedeEntrar('log')) {
+        <a routerLink="/admin/log" routerLinkActive="activo">Actividad</a>
+      }
+      <!-- 'roles' nunca está en las secciones de un rol: solo lo ve el admin -->
+      @if (auth.puedeEntrar('roles')) {
+        <a routerLink="/admin/roles" routerLinkActive="activo">Roles</a>
+      }
     </nav>
   </aside>
 

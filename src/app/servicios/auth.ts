@@ -11,6 +11,9 @@ export class Auth {
     // Lo leen el navbar y los guards; como es un signal, el navbar se actualiza solo.
     perfil = signal<Perfil | null>(null);
 
+    // Secciones del admin que le da su rol configurable (mail RPP). [] = ninguna
+    secciones = signal<string[]>([]);
+
     constructor() {
         this.supabase = createClient(environment.supabaseUrl, environment.supabasePublishableKey)
     }
@@ -50,15 +53,41 @@ export class Auth {
         const usuario = await this.getUser();
         if (!usuario.data.user) {
             this.perfil.set(null);
+            this.secciones.set([]);
             return null;
         }
         const result = await this.getPerfil(usuario.data.user.id);
         if (result.error || result.data.length === 0) {
             this.perfil.set(null);
+            this.secciones.set([]);
             return null;
         }
+        // Primero las secciones y después el perfil: un guard que ve el perfil cargado
+        // ya encuentra también sus secciones
+        this.secciones.set(await this.cargarSecciones(result.data[0]));
         this.perfil.set(result.data[0]);
         return result.data[0];
+    }
+
+    // Las secciones de su rol configurable, solo si el rol sigue activo
+    private async cargarSecciones(perfil: Perfil): Promise<string[]> {
+        if (!perfil.rol_id) {
+            return [];
+        }
+        const rol = await this.supabase.from('roles').select('activo').eq('id', perfil.rol_id);
+        if (rol.error || rol.data.length === 0 || !rol.data[0].activo) {
+            return [];
+        }
+        const secciones = await this.supabase.from('rol_secciones').select('seccion').eq('rol_id', perfil.rol_id);
+        if (secciones.error) {
+            return [];
+        }
+        return secciones.data.map(fila => fila.seccion);
+    }
+
+    // ¿Puede entrar a esa parte del panel? El admin a todo; el resto, solo a las de su rol
+    puedeEntrar(seccion: string) {
+        return this.perfil()?.rol === 'admin' || this.secciones().includes(seccion);
     }
 
     // Para los guards: si el perfil ya está cargado lo devuelve; si no (ej. al recargar la página), lo busca.
@@ -100,5 +129,6 @@ export class Auth {
     async cerrarSesion() {
         await this.signOut();
         this.perfil.set(null);
+        this.secciones.set([]);
     }
 }
