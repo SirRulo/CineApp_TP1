@@ -125,6 +125,28 @@ Las tablas `recompensas`, `combos` y `combo_productos` están creadas; falta la 
 | Producto del candy más vendido | ✅ | top 5 del período |
 | Log: quién creó funciones, cambió precios, validó QR, con fecha y hora | ✅ | admin › Actividad |
 
+## Mail RPP (recuperatorio) · Propuestas, roles, lista de espera y cancelación de funciones
+
+| Requerimiento | Estado | Dónde |
+|---|---|---|
+| El cliente propone una película: título, descripción y por qué | ✅ | Proponer película (`/propuestas`) |
+| Una propuesta a la vez por cliente | ✅ | se oculta el formulario + índice único `una_propuesta_pendiente` |
+| El admin ve las propuestas y las acepta o rechaza | ✅ | admin › Propuestas |
+| Al aceptar, lleva a crear la película con los datos enviados | ✅ | alta de película con título y sinopsis cargados |
+| Roles que acceden solo a ciertas partes del admin, configurables | ✅ | admin › Roles (secciones con casillas) |
+| Elegir a qué usuario darle el rol | ✅ | admin › Roles › Asignar rol |
+| Lista de espera en funciones agotadas, solo registrados | ✅ | mapa de butacas: "Función agotada" → Anotarme |
+| Al liberarse una butaca, avisar automáticamente al primero (notificación push) | ⚠️ | notificación en vivo (campanita + aviso del sistema con la app abierta) |
+| 15 minutos para comprar; después la butaca pasa al siguiente | ⚠️ | butaca guardada 15 min; el vencimiento se procesa al abrir el mapa, el perfil o pagar |
+| El usuario ve en su perfil en qué listas está y en qué posición | ✅ | Mis compras › Mis listas de espera |
+| El admin ve cuánta gente espera por función | ✅ | admin › Funciones ("N en espera") |
+| Cancelar una función completa desde el admin | ✅ | admin › Funciones › Cancelar función |
+| Todo lo vendido (entradas + candy) pasa a crédito | ✅ | `total + credito_usado` de cada compra con cuenta |
+| Las butacas se liberan | ✅ | entradas canceladas |
+| Cada comprador recibe una notificación | ✅ | notificación en vivo con link a la película |
+| Ofrecer reubicarse en otra función de la misma película con el crédito | ✅ | el link lleva a la película; al pagar se usa el crédito |
+| Atómico: se acredita a todos o a nadie | ✅ | función de Postgres `cancelar_funcion` (transacción), llamada con `rpc` |
+
 ---
 
 ## Criterios adoptados
@@ -145,3 +167,8 @@ Puntos que los mails no definen y cómo se resolvieron:
 | QR | Imagen generada por un servicio externo con el código de la compra; el empleado lo valida escribiendo el código |
 | Puntos | 1 por peso de lo cobrado con el medio de pago (`total`). Lo pagado con crédito no suma: esa plata ya había sumado puntos en la compra cancelada |
 | Borrado | Baja lógica (`activa` / `estado`); no se borran datos |
+| Notificación push | Notificaciones guardadas en la base, en vivo con Realtime y como aviso del sistema (Notification API) mientras la app está abierta. Con el navegador cerrado se ven al volver (una push real necesita un servidor que la envíe) |
+| 15 minutos de la lista de espera | Sin procesos programados: se guarda cuándo se avisó y el turno se vence cuando alguien abre el mapa, su perfil o paga ("cuenta perezosa") |
+| Cancelación de funciones | Solo funciones que no terminaron. Las compras anónimas se cancelan sin crédito (no hay cuenta): reintegro en boletería con el código. Las ya usadas también reciben crédito (la función no se dio) |
+| Roles configurables | Se suman al rol base (cliente o empleado). "Roles" no se puede dar: solo el admin crea y asigna roles |
+| Perfil del usuario | "Mis compras" funciona como perfil: compras, crédito, puntos y listas de espera |

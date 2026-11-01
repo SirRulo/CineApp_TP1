@@ -444,6 +444,14 @@ Como los roles y el panel admin arrancaron en S1, acá se completa lo que falta:
 - Guion de demo de 5 minutos y ensayo de preguntas (sección 9).
 - 05/10: solo entrega. No se programa.
 
+### R · Recuperatorio — Mail "RPP final" (desde 01/11; recuperatorio lun 30/11, pre-entregas lun y mié)
+**Pide:** propuestas de películas de los clientes (una a la vez; aceptar → alta de película con los datos) · roles configurables por partes del admin, asignables a un usuario · lista de espera en funciones agotadas (aviso push al primero, 15 min para comprar, posición en el perfil, conteo en el admin) · cancelación de funciones por el cine (todo a crédito con candy, butacas libres, notificación, reubicación, **atómico**).
+**Decisiones (01/11):** atomicidad = **función de Postgres + `rpc()`** (única lógica en la base) · push = **tabla `notificaciones` + Realtime + Notification API** · 15 min = **cuenta perezosa** con `avisado_en` · aviso al primero en Angular con `update` condicional · rol configurable **se suma** al rol base y "Roles" no se puede dar · compras anónimas: sin crédito, reintegro en boletería.
+**Pasos:** 0 tablas (`recuperatorio.sql`) · 1 propuestas (1a servicio, 1b cliente, 1c admin + `PropuestaAceptada`) · 2 notificaciones (`Campanita` + Realtime + Notification API) · 3 cancelar función (`cancelar_funcion.sql` + `rpc`) · 4 lista de espera (4a anotarse, 4b avisar al primero, 4c-1 reserva en el mapa, 4c-2 vencimiento, 4c-3 al pagar, 4d puesto y conteo) · 5 roles (5a servicio, 5b pantalla, 5c `panelGuard` + `seccionGuard`) · 6 cierre (README sección 6, `REQUERIMIENTOS.md`, este sprint).
+**Temas de la cursada que se usan:** formularios reactivos, `input()`, servicios con `BehaviorSubject` y `.value`, signals, guards `canMatch` / `canActivate` / **`canActivateChild`** (`child-guard` de la cátedra), módulo lazy, ciclo de vida (`ngOnInit` / `ngOnDestroy`).
+**Preguntas probables:** ¿cómo garantizás la atomicidad? · ¿es push de verdad? · ¿cómo se vencen los 15 min sin un proceso en el servidor? · ¿qué evita avisar dos veces al mismo? · ¿por qué dos guards en el panel? (respuestas en `TP1/resumen/defensa-r.md`).
+**Para la corrección:** llevar una función agotada (`TP1/supabase/prueba_agotar_funcion.sql`) y otra con compras para cancelar.
+
 ---
 
 ## 6. Calendario por pre-entregas

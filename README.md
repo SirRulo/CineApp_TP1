@@ -3,7 +3,9 @@
 Trabajo Práctico 1 · Programación IV · UTN FRA · 2.º cuatrimestre 2026
 Alumno: Franco Barbizan
 
-Aplicación web para un cine: cartelera, compra de entradas con selección de butacas en tiempo real, candy bar, cupones, preventa, reseñas, entrada con QR y PDF, cancelación con crédito, panel de administración (películas, funciones, candy, cupones, reportes y actividad) y panel de empleados (validación de compras por código).
+Aplicación web para un cine: cartelera, compra de entradas con selección de butacas en tiempo real, candy bar, cupones, preventa, reseñas, entrada con QR y PDF, cancelación con crédito, propuestas de películas, lista de espera para funciones agotadas, notificaciones en vivo, panel de administración (películas, funciones y su cancelación, candy, cupones, propuestas, roles configurables, reportes y actividad) y panel de empleados (validación de compras por código).
+
+**Recuperatorio (30/11/2026):** se sumaron los cuatro pedidos del último mail del cliente (`docs/RPP final.pdf`): propuestas de películas, roles configurables, lista de espera y cancelación de funciones por el cine. Ver la sección 6.
 
 - **App desplegada:** https://cine-app-flax.vercel.app
 - **Repositorio:** https://github.com/SirRulo/CineApp_TP1
@@ -16,12 +18,12 @@ Aplicación web para un cine: cartelera, compra de entradas con selección de bu
 | Herramienta | Para qué |
 |---|---|
 | **Angular 22** | Frontend: componentes standalone, signals, control flow (`@if` / `@for`), rutas con carga perezosa, un módulo lazy para el admin |
-| **Supabase** (`@supabase/supabase-js`) | Autenticación (mail y contraseña), base de datos Postgres y Realtime (butacas en vivo). Es el único backend |
+| **Supabase** (`@supabase/supabase-js`) | Autenticación (mail y contraseña), base de datos Postgres, Realtime (butacas y notificaciones en vivo) y **una** función de Postgres (cancelación atómica de funciones). Es el único backend |
 | **PWA** (`@angular/pwa`) | Service worker y manifest: la app se puede instalar |
 | **Vercel** | Hosting del build estático. Cada `git push` a `main` publica una versión nueva |
 | **CSS plano** | Estilos propios con variables en `:root` (`src/styles.css`), incluidos los estilos de impresión. Sin librerías de UI |
 
-Se usan solo las herramientas y los patrones vistos en la cursada (repositorio de la cátedra `A342-2`). Las pocas excepciones (Realtime, `window.print()`, barras con CSS) están explicadas en la sección 3.4.
+Se usan solo las herramientas y los patrones vistos en la cursada (repositorio de la cátedra `A342-2`). Las pocas excepciones (Realtime, `window.print()`, barras con CSS, la función de Postgres con `rpc`, la Notification API) están explicadas en la sección 3.4.
 
 ### Cómo correrlo
 
@@ -57,9 +59,9 @@ Componentes (pantallas)  ──usan──▶  Servicios  ──consultan──�
 | Carpeta | Contenido |
 |---|---|
 | `componentes/` | Una carpeta por componente (`.ts`, `.html`, `.css`) |
-| `servicios/` | `auth`, `peliculas`, `funciones`, `compras`, `candy`, `resenas`, `log` (Supabase) y `carrito` (estado en memoria) |
-| `models/` | Interfaces: `Pelicula`, `Funcion`, `Sala`, `Butaca`, `Compra`, `Entrada`, `Cupon`, `Producto`, `Categoria`, `CompraProducto`, `MovimientoCredito`, `Actividad`, `Resena`, `Perfil`, `ContenidoCarrito`, etc. |
-| `guards/` | `authGuard` (`CanActivateFn`: pide sesión) y `roleGuard(rol)` (`CanMatchFn`: compara el rol del perfil) |
+| `servicios/` | `auth`, `peliculas`, `funciones`, `compras`, `candy`, `resenas`, `log`, `puntos`, `propuestas`, `notificaciones`, `lista-espera`, `roles` (Supabase) y `carrito`, `propuesta-aceptada` (estado en memoria) |
+| `models/` | Interfaces: `Pelicula`, `Funcion`, `Sala`, `Butaca`, `Compra`, `Entrada`, `Cupon`, `Producto`, `Categoria`, `CompraProducto`, `MovimientoCredito`, `Actividad`, `Resena`, `Perfil`, `ContenidoCarrito`, `Propuesta`, `Notificacion`, `Espera`, `Rol`, etc. y la constante `SECCIONES_ADMIN` |
+| `guards/` | `authGuard` (`CanActivateFn`: pide sesión), `roleGuard(rol)` (`CanMatchFn`: compara el rol del perfil), `panelGuard` (`CanMatchFn`: admin o rol configurable) y `seccionGuard` (`CanActivateChildFn`: cada pantalla del panel) |
 | `pipes/` | Pipes propios: `filtro` (buscador de la cartelera) y `promedio` (estrellas de las reseñas) |
 | `validators/` | Regla de los 30 minutos entre funciones (`haySolapamiento`, `sinSolapamientoValidator`) |
 | `directivas/` | `*appAdmin`: directiva estructural que muestra un elemento solo si el usuario es admin |
@@ -69,14 +71,20 @@ Componentes (pantallas)  ──usan──▶  Servicios  ──consultan──�
 
 | Servicio | Tablas | Lo usan |
 |---|---|---|
-| `Auth` | Supabase Auth, `perfiles` | `Navbar`, `Login`, `Registro`, `DetallePelicula`, `Compra`, `MisCompras`, `Empleado`, `LogActividad`, `authGuard`, `roleGuard`, `*appAdmin`, `Log` |
+| `Auth` | Supabase Auth, `perfiles`, `roles`, `rol_secciones` (secciones del rol configurable) | `Navbar`, `Login`, `Registro`, `DetallePelicula`, `Compra`, `MisCompras`, `Empleado`, `LogActividad`, `authGuard`, `roleGuard`, `*appAdmin`, `Log` |
 | `Peliculas` | `peliculas`, `generos`, `pelicula_generos` | Cartelera, detalle, butacas, mis compras, empleado y casi todo el admin |
-| `Funciones` | `salas`, `funciones`, `butacas`, `entradas` (ocupadas + canal Realtime) | `Home`, `DetallePelicula`, `SeleccionButacas`, `MisCompras`, `Empleado`, `ListaFunciones`, `AltaFuncion`, `ProgramarFunciones`, `ReporteFacturacion` |
+| `Funciones` | `salas`, `funciones`, `butacas`, `entradas` (ocupadas + canal Realtime), `rpc('cancelar_funcion')` | `Home`, `DetallePelicula`, `SeleccionButacas`, `MisCompras`, `Empleado`, `ListaFunciones`, `AltaFuncion`, `ProgramarFunciones`, `ReporteFacturacion` |
 | `Compras` | `compras`, `entradas`, `compra_productos`, `cupones`, `movimientos_credito` | `Home` (top 3), `Compra`, `MisCompras`, `Empleado`, `ListaCupones`, `ReporteFacturacion` |
 | `Candy` | `categorias`, `productos` | `CandyBar`, `Empleado`, `ListaProductos`, `AltaProducto`, `ReporteFacturacion` |
 | `Resenas` | `resenas` | `DetallePelicula` |
 | `Log` | `log_actividad` | `AltaFuncion`, `ProgramarFunciones`, `AltaProducto`, `ListaCupones`, `Empleado` (registran) y `LogActividad` (muestra) |
 | `Carrito` | — (en memoria, `BehaviorSubject`) | `SeleccionButacas` (escribe), `CandyBar` (agrega productos), `Compra` (lee y vacía) |
+| `Puntos` | `movimientos_puntos` | `Compra`, `MisCompras` |
+| `Propuestas` | `propuestas` | `MisPropuestas`, `ListaPropuestas` |
+| `PropuestaAceptada` | — (en memoria, `BehaviorSubject`) | `ListaPropuestas` (escribe), `AltaPelicula` (lee y vacía) |
+| `Notificaciones` | `notificaciones` (+ canal Realtime) | `Campanita`, `ListaEspera` |
+| `ListaEspera` | `lista_espera`, `entradas` | `SeleccionButacas`, `Compra`, `MisCompras`, `ListaFunciones` |
+| `Roles` | `roles`, `rol_secciones`, `perfiles.rol_id` | `ListaRoles` |
 
 ### 2.4 Rutas y roles
 
@@ -89,15 +97,18 @@ Todas las pantallas usan `loadComponent` (carga perezosa); el admin además es u
 | `/funcion/:id` | Mapa de butacas (en tiempo real) | Todos (se puede comprar sin cuenta; +13/+18 solo con cuenta) |
 | `/candy` | Candy bar (paso opcional de la compra) | Todos |
 | `/compra` | Resumen, cupón, crédito y pago simulado | Todos |
-| `/mis-compras` | Compras del cliente, cancelación y saldo de crédito | Con sesión (`authGuard`) |
+| `/mis-compras` | Compras del cliente, cancelación, saldo de crédito y puntos, listas de espera con su puesto | Con sesión (`authGuard`) |
+| `/propuestas` | Proponer una película (una en revisión a la vez) e historial | Con sesión (`authGuard`) |
 | `/registro`, `/login` | Alta de cliente e inicio de sesión | Todos |
-| `/admin` → `peliculas`, `peliculas/nueva`, `peliculas/editar/:id`, `funciones`, `funciones/nueva`, `funciones/programar`, `productos`, `productos/nuevo`, `productos/editar/:id`, `cupones`, `reportes`, `log` | Panel de administración (módulo lazy con rutas hijas) | Rol `admin` |
+| `/admin` → `peliculas`, `peliculas/nueva`, `peliculas/editar/:id`, `funciones`, `funciones/nueva`, `funciones/programar`, `productos`, `productos/nuevo`, `productos/editar/:id`, `cupones`, `propuestas`, `reportes`, `log`, `roles` | Panel de administración (módulo lazy con rutas hijas) | Rol `admin` (todo) o un **rol configurable** (solo sus secciones; `roles` solo admin) |
 | `/empleado` | Validación de compras por código | Rol `empleado` |
 | `**` | Página de error | — |
 
 **Roles:** anónimo, cliente, empleado y admin. El rol es un campo de la tabla `perfiles` (no se decide por el mail). Hay **un solo login**: después de ingresar, se redirige según el rol. El registro público crea solo clientes; admin y empleados se asignan en la base.
 
-Las rutas de admin y empleado usan `canMatch: [roleGuard('...')]`. Si el rol no coincide, la ruta no existe para ese usuario, se muestra la página de error y el código del módulo admin ni siquiera se descarga. `/mis-compras` usa `canActivate: [authGuard]`: sin sesión, lleva al login.
+La ruta de empleado usa `canMatch: [roleGuard('empleado')]` y la del panel `canMatch: [panelGuard]`. Si no puede entrar, la ruta no existe para ese usuario, se muestra la página de error y el código del módulo admin ni siquiera se descarga. Adentro del panel, `canActivateChild: [seccionGuard]` controla cada pantalla y, si no tiene esa sección, lo redirige a la primera que sí tiene. `/mis-compras` y `/propuestas` usan `canActivate: [authGuard]`: sin sesión, llevan al login.
+
+**Roles configurables** (recuperatorio): el admin crea roles (ej. "Reportes"), elige a qué secciones del panel entran y se los asigna a un usuario (`perfiles.rol_id`). Se **suman** al rol base: un empleado con "Reportes" sigue validando entradas y además ve el panel con esa sola sección.
 
 ### 2.5 Comunicación entre componentes
 
@@ -108,14 +119,19 @@ Las rutas de admin y empleado usan `canMatch: [roleGuard('...')]`. Si el rol no 
 | Sesión (`Navbar`, guards, directiva, pantallas) | Signal `perfil` en el servicio `Auth` |
 | Butacas → Candy → Compra (rutas distintas) | Servicio `Carrito` con `BehaviorSubject` (`next` / `subscribe`, `unsubscribe` en `ngOnDestroy`) |
 | Compras de otras personas → mapa abierto | Canal de Supabase Realtime sobre `entradas` de esa función (se cierra en `ngOnDestroy`) |
+| `Navbar` → `Campanita` | `input()` (`usuarioId`). La campanita está dentro del `@if` de sesión: se crea al loguearse (abre su canal Realtime de `notificaciones`) y se destruye al salir (lo cierra) |
+| `ListaPropuestas` → `AltaPelicula` (aceptar una propuesta) | Servicio `PropuestaAceptada` con `BehaviorSubject`; el alta lee `.value` una vez y lo vacía |
 
 ### 2.6 Modelo de datos (Supabase)
 
-Tablas en uso: `perfiles`, `peliculas`, `generos`, `pelicula_generos` (N:M), `salas`, `butacas`, `funciones`, `compras`, `entradas`, `cupones`, `categorias`, `productos`, `compra_productos`, `movimientos_credito`, `resenas` y `log_actividad`. Creadas para lo que falta (sección 4): `combos`, `combo_productos`, `recompensas`, `movimientos_puntos` y `alertas_estreno`.
+Tablas en uso: `perfiles`, `peliculas`, `generos`, `pelicula_generos` (N:M), `salas`, `butacas`, `funciones`, `compras`, `entradas`, `cupones`, `categorias`, `productos`, `compra_productos`, `movimientos_credito`, `movimientos_puntos`, `resenas` y `log_actividad`; del recuperatorio: `propuestas`, `roles`, `rol_secciones` (N:M), `notificaciones` y `lista_espera`, más las columnas `perfiles.rol_id` y `funciones.cancelada_en`. Creadas para lo que falta (sección 4): `combos`, `combo_productos`, `recompensas` y `alertas_estreno`.
+
+Scripts (fuera del repositorio, se corren una vez en el SQL Editor): `cine.sql` (tablas y datos iniciales), `recuperatorio.sql` (tablas nuevas) y `cancelar_funcion.sql` (la única función de la base).
 
 - Claves `bigint generated by default as identity`, relaciones con `references` y restricciones con `not null`, `unique` y `check`.
 - Índice único `butaca_vendida_una_vez (funcion_id, butaca_id)` sobre las entradas activas: impide vender dos veces la misma butaca.
 - `unique (pelicula_id, usuario_id)` en `resenas`: una reseña por persona y película.
+- Índices únicos **parciales** `una_propuesta_pendiente` (una propuesta en revisión por cliente) y `una_vez_en_la_lista` (una vez por función mientras espera).
 - **Saldo de crédito** (y de puntos) = suma de movimientos; no hay columna de saldo.
 - Validación de una compra: dos marcas independientes, **fecha + quién** (`ingreso_validado_en/por`, `candy_entregado_en/por`).
 
@@ -157,11 +173,16 @@ Tablas en uso: `perfiles`, `peliculas`, `generos`, `pelicula_generos` (N:M), `sa
 | Cancelación | Desde "Mis compras", hasta **2 h antes** y si no se usó. Se cancelan la compra y sus entradas (las butacas se liberan) y se acredita `total + credito_usado` como **crédito**, no reembolso |
 | Puntos | **1 punto por peso** cobrado con el pago (no lo pagado con crédito), solo con cuenta. Saldo = suma de movimientos (`movimientos_puntos`), visible en "Mis compras". Al cancelar, se descuentan los puntos que sumó esa compra (`reverso`). **Sin canje** |
 | Crédito | Se puede usar en otra compra junto con el pago simulado; se usa solo lo necesario |
-| Log de actividad | Se registra quién creó funciones, cambió precios (cupones y candy), validó entradas y entregó candy, con fecha y hora. El admin lo ve filtrado por acción |
+| Log de actividad | Se registra quién creó funciones, cambió precios (cupones y candy), validó entradas, entregó candy, respondió propuestas, canceló funciones y creó, editó o asignó roles, con fecha y hora. El admin lo ve filtrado por acción |
 | Reportes | Facturación por día (7 días / 30 días / todo, en hora local), películas más vistas (barras) y candy más vendido. Se exporta a **PDF** y a **Excel (CSV)** |
 | Reseñas | Solo usuarios registrados; una por película; comentario opcional de hasta 200 caracteres |
 | Top 3 | Películas activas con más entradas vendidas (entradas activas) |
 | Cartelera | Las películas activas **ya estrenadas**; primero las destacadas. Las de estreno futuro van a **"Próximamente"** (con la fecha y el estado de la preventa) |
+| Propuestas de películas | El cliente manda título, descripción y motivo; **una en revisión a la vez** (pantalla + índice único). El admin acepta (se abre el alta de película con título y sinopsis cargados) o rechaza; si dos admins responden a la vez, gana uno (`update ... where estado = 'pendiente'`) |
+| Lista de espera | Solo registrados, en funciones **agotadas**. Al cancelar una compra, cada butaca liberada se **guarda 15 minutos** para el primero de la fila, que recibe una notificación; para el resto se ve ocupada. Si no compra a tiempo, el turno **vence** y la butaca pasa al siguiente. El cliente ve su puesto en "Mis compras" y el admin cuántos esperan por función |
+| Cancelación de funciones | Desde el admin, mientras la función no terminó. **Atómica** (función de Postgres): compras y entradas canceladas, butacas libres, crédito por `total + credito_usado` (entradas + candy), reverso de puntos y notificación con link a la película para **reubicarse** usando el crédito. Las compras **anónimas** se cancelan sin crédito (reintegro en boletería con el código) |
+| Notificaciones | Se guardan en la tabla `notificaciones` y llegan en vivo a la campanita del navbar (Realtime). Si el usuario dio permiso, también se muestra un aviso del sistema (Notification API) |
+| Roles configurables | Secciones fijas del panel (`SECCIONES_ADMIN`); "Roles" no se puede dar. Un rol inactivo no da acceso |
 | UX | Sin selectores de fecha con calendario: días y horarios como botones; fechas lejanas en tres campos numéricos (día / mes / año). Compra por pasos: detalle → butacas → candy → pago |
 
 ### 3.3 Hosting
@@ -178,10 +199,17 @@ Se usa **Vercel** en lugar de Firebase Hosting (misma idea: sirve el build está
 | PDF de la entrada | **`window.print()`**, el mismo mecanismo del reporte |
 | Exportar a Excel | **CSV** armado en TypeScript (`;` y coma decimal para Excel en español) y descargado con `Blob` + `<a download>`. Sin librerías |
 | Gráfico de más vistas | Barras hechas con `div` y `[style.width.%]`. Sin librerías |
+| Cancelación atómica de funciones | **Función de Postgres** (`plpgsql`) `cancelar_funcion`, llamada con `supabase.rpc(...)`. Corre en una transacción: si un paso falla, se deshace todo. Es la **única** lógica en la base, porque el cliente pidió explícitamente que fuera atómica |
+| "Notificación push" | Tabla + Realtime + **Notification API** del navegador (aviso del sistema mientras la app está abierta). Una push con el navegador cerrado necesita un servidor que la envíe (claves VAPID) |
+| 15 minutos de la lista de espera | Sin tareas programadas (cron): **cuenta perezosa**. Se guarda `avisado_en` y el turno se vence cuando alguien abre el mapa, su perfil o paga |
+| Redirección en guards | `seccionGuard` devuelve un `UrlTree` (`router.createUrlTree`) para mandar a la primera sección permitida |
 
 ### 3.5 Limitaciones conocidas
 
-- **Operaciones en varios pasos:** registro (`signUp` + perfil), película (película + géneros), compra (compra + candy + entradas) y cancelación (compra + entradas + crédito). Si falla un paso intermedio, no hay atomicidad. Se valida todo antes del primer paso y, en la compra, se marca `cancelada`. La atomicidad real requeriría funciones en la base, que no forman parte del material.
+- **Operaciones en varios pasos:** registro (`signUp` + perfil), película (película + géneros), compra (compra + candy + entradas) y cancelación del cliente (compra + entradas + crédito). Si falla un paso intermedio, no hay atomicidad. Se valida todo antes del primer paso y, en la compra, se marca `cancelada`. La única operación atómica es la **cancelación de funciones por el cine** (función de Postgres), porque el cliente lo pidió explícitamente.
+- **Lista de espera:** el vencimiento de los 15 minutos ocurre cuando alguien abre el mapa de la función, su perfil o paga (no hay un proceso en el servidor). Hay un instante, entre que se libera la butaca y se le reserva al primero, en que otro podría verla libre; el pago lo vuelve a controlar.
+- **Notificaciones:** llegan en vivo con la app abierta; con el navegador cerrado se ven al volver a entrar (no hay push real).
+- **Roles configurables:** si el admin le asigna un rol a alguien que ya está logueado, lo ve al volver a entrar o al recargar.
 - **Carrito en memoria:** al recargar la página se vacía.
 - **Funciones sin edición:** se desactivan y se carga otra.
 - **Sin RLS** en Supabase por ahora (pendiente de confirmar con la cátedra).
@@ -191,7 +219,7 @@ Se usa **Vercel** en lugar de Firebase Hosting (misma idea: sirve el build está
 
 ## 4. Alcance
 
-**Implementado:** registro y login con roles · panel de administración (películas, funciones con la regla de 30 minutos, asignación automática de sala, candy bar, alta y edición de cupones, reportes con gráfico, PDF y Excel, log de actividad) · cartelera con buscador y top 3 · detalle con reseñas y promedio · restricción de edad · mapa de butacas en tiempo real · candy bar en la compra · cupones de primera compra y +50 · puntos (acumulación y reverso) · Próximamente y preventa · entrada con QR y descarga en PDF · cancelación con crédito y uso del crédito · panel de empleados con validación por código · PWA y deploy.
+**Implementado:** registro y login con roles · panel de administración (películas, funciones con la regla de 30 minutos, asignación automática de sala, candy bar, alta y edición de cupones, reportes con gráfico, PDF y Excel, log de actividad) · cartelera con buscador y top 3 · detalle con reseñas y promedio · restricción de edad · mapa de butacas en tiempo real · candy bar en la compra · cupones de primera compra y +50 · puntos (acumulación y reverso) · Próximamente y preventa · entrada con QR y descarga en PDF · cancelación con crédito y uso del crédito · panel de empleados con validación por código · PWA y deploy · **recuperatorio:** propuestas de películas, roles configurables por sección, lista de espera con turno de 15 minutos, cancelación atómica de funciones con crédito y reubicación, notificaciones en vivo.
 
 **No implementado** (por tiempo; las tablas ya están creadas en la base):
 - **Canje de puntos y recompensas** (mail 03/03): los puntos se acumulan y se ven, pero no se canjean. Tabla `recompensas` creada ("Entrada gratis", 500 pts).
@@ -199,7 +227,7 @@ Se usa **Vercel** en lugar de Firebase Hosting (misma idea: sirve el build está
 - **Alertas de estreno y "Mis películas"** (mail 08/03). "Próximamente" y la preventa sí están.
 - **Admin de salas y distribución de butacas** (mail 06/02): las salas y sus 518 butacas se cargan con el script SQL; la distribución es fija según los mails.
 - **Lector de QR con cámara**: la validación se hace con el **código escrito a mano**, que el mail permite como alternativa.
-- **Notificaciones push.**
+- **Notificaciones push con el navegador cerrado** (las notificaciones en vivo con la app abierta sí están).
 
 **Fuera de alcance:** el **mapa del cine** (el cliente no dio luz verde).
 
@@ -208,4 +236,16 @@ Se usa **Vercel** en lugar de Firebase Hosting (misma idea: sirve el build está
 ## 5. Pruebas
 
 - **Camino principal** (04/10/2026, sobre la URL de Vercel): recorrido completo aprobado. Admin carga películas, funciones (con choque de horario rechazado y programación automática), candy y cupones → compra anónima con VIP y candy → cliente con cupón, tiempo real entre dos navegadores, reseña, cancelación y uso del crédito → menor de edad bloqueado en +18 → empleado busca el código y entrega el candy → reporte, gráfico, PDF y log → F5 en rutas protegidas, página de error, vista de celular y PWA instalable.
+- **Recuperatorio:** las pruebas de los cuatro pedidos nuevos (propuestas, roles, lista de espera, cancelación de funciones) se hacen sobre Vercel con una función agotada (script de prueba `prueba_agotar_funcion.sql`) y otra con compras de clientes y anónimas.
 - **Tests automáticos:** pendientes (los `.spec.ts` generados por Angular no están actualizados).
+
+---
+
+## 6. Recuperatorio (mail "RPP final")
+
+| Pedido | Cómo se resolvió | Dónde |
+|---|---|---|
+| Los clientes proponen películas (una a la vez); el admin acepta o rechaza; al aceptar va a crear la película con los datos | Formulario reactivo + índice único parcial; aceptar guarda la propuesta en un servicio y abre el alta con título y sinopsis | `MisPropuestas`, `ListaPropuestas`, `AltaPelicula` |
+| Roles que acceden a ciertas partes del admin, configurables y asignables a un usuario | Tablas `roles` y `rol_secciones`; `panelGuard` + `seccionGuard`; menú filtrado | `ListaRoles`, `Auth`, guards |
+| Lista de espera en funciones agotadas, aviso push al primero, 15 minutos, posición en el perfil, conteo en el admin | Tabla `lista_espera`; turno guardado con `avisado_en`; vencimiento perezoso; notificaciones en vivo | `SeleccionButacas`, `ListaEspera`, `MisCompras`, `ListaFunciones`, `Compra` |
+| Cancelar una función: todo a crédito (con candy), butacas libres, notificación, oferta de reubicación, **atómico** | Función de Postgres `cancelar_funcion` (transacción) llamada con `rpc` | `ListaFunciones`, `Funciones` |
